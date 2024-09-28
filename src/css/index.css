@@ -1,0 +1,21 @@
+/* src/index.css */
+body {
+    transition: background-color 0.5s ease;
+  }
+  
+  [data-theme='light'] {
+    background-color: #F5F5F5;
+  }
+  
+  [data-theme='dark'] {
+    background-color: #061826;
+  }
+  /* src/global.css */
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+#root {
+  height: 100%;
+}

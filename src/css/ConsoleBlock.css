@@ -1,0 +1,31 @@
+.console-container {
+    max-height: 300px; /* Set your desired max height */
+    overflow-y: auto; /* Enables scrolling when content exceeds max height */
+    background-color: #1e1e1e; /* Dark background to mimic console */
+    color: #d4d4d4; /* Light grey text */
+    font-family: 'Courier New', Courier, monospace; /* Console-like font */
+    border: 1px solid #333; /* Darker border to resemble a console window */
+    padding: 10px;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5); /* Inner shadow for depth */
+  }
+  
+  .console-content p {
+    margin: 0;
+    padding: 0;
+    line-height: 1.5;
+    word-wrap: break-word; /* Ensure long text wraps */
+  }
+  
+  .console-container::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .console-container::-webkit-scrollbar-thumb {
+    background-color: #555;
+    border-radius: 4px;
+  }
+  
+  .console-container::-webkit-scrollbar-track {
+    background-color: #222;
+  }
+  
