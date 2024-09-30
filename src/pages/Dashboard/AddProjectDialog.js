@@ -92,11 +92,12 @@ const AddProjectDialog = ({ open, onClose, token , refresh}) => {
       setError,
       (res) => {
         refresh();
+        onClose();
       },
       null
     );
 
-    onClose();
+    
   };
 
   return (

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -12,6 +12,9 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Alert,
+  Backdrop,
+  CircularProgress,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ApiIcon from "@mui/icons-material/Api";
@@ -24,7 +27,12 @@ import { Fonts } from "../../assets/fonts/Fonts";
 import BiotechIcon from "@mui/icons-material/Biotech";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import EditIcon from "@mui/icons-material/Edit";
-
+import { DeleteRequestJson, GetRequest } from "../../Network/ApiRequests";
+import { ApiUrls } from "../../Network/ApiUrls";
+import { UserContext } from "../../context/MyContext";
+import { FormateDate } from "../../utill/Helper";
+import BlockIcon from "@mui/icons-material/Block";
+import InviteUserDialoug from "./InviteUserDialoug";
 const apiList = [
   {
     name: "Get Users",
@@ -82,11 +90,53 @@ const apiList = [
 const APIManagement = ({ setSelectedPage, data }) => {
   const [expanded, setExpanded] = useState(null);
   const [env, setEnv] = useState(data?.project?.environments);
-  const [selectedEnv, setSelectedEnv] = useState(data?.project?.environments[0].id);
-  console.log(env);
+  const [users, setUsers] = useState([]);
+  const [selectedEnv, setSelectedEnv] = useState(
+    data?.project?.environments[0].id
+  );
+  const { token } = useContext(UserContext);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
+  const [progress, setProgress] = useState(false);
+  const [open, setOpen] = useState(false);
+
   const theme = useTheme();
   const handleToggleExpand = (index) => {
     setExpanded(expanded === index ? null : index);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const getAllUsers = () => {
+    GetRequest(
+      ApiUrls.getProjectsAccess + data?.project?.id,
+      {},
+      setProgress,
+      token,
+      null,
+      setError,
+      (res) => {
+        setUsers(res?.data);
+      },
+      null
+    );
+  };
+
+  const deleteAccess = (id) => {
+    DeleteRequestJson(
+      ApiUrls.getProjectsAccess +id,
+      {},
+      setProgress,
+      token,
+      null,
+      setError,
+      (res) => {
+        getAllUsers();
+      },
+      null
+    );
   };
 
   useEffect(() => {
@@ -94,10 +144,96 @@ const APIManagement = ({ setSelectedPage, data }) => {
     } else {
       setSelectedPage("dashboard");
     }
+
+    getAllUsers();
   }, []);
+
   const handleChangeEnv = (e) => {
     setSelectedEnv(e.target.value);
   };
+
+  const RenderItem = useCallback(
+    (user) => (
+      <Grid2
+        item
+        key={user.id}
+        style={{
+          borderWidth: 1,
+          borderColor: theme.palette.primary.light,
+          borderStyle: "solid",
+          borderRadius: 10,
+          padding: 10,
+          flexDirection: "row",
+          display: "flex",
+        }}
+        size={4}
+      >
+        <div style={{ flex: 1 }}>
+          <Typography variant="h7" style={{ fontFamily: Fonts.roboto_mono }}>
+            {user?.user?.name}
+          </Typography>
+          <Typography
+            color="textSecondary"
+            gutterBottom
+            style={{
+              marginTop: 5,
+              fontSize: 12,
+              fontFamily: Fonts.roboto_mono,
+            }}
+          >
+            AccessLevel: {user?.accessLevel}
+          </Typography>
+          <Typography
+            color="textSecondary"
+            variant="body2"
+            style={{ marginTop: 5, fontFamily: Fonts.roboto_mono }}
+          >
+            GrantedBy: {user?.grantedBy?.name}
+          </Typography>
+          <Typography
+            color="textSecondary"
+            variant="body2"
+            style={{ fontFamily: Fonts.roboto_mono }}
+          >
+            Assigned On: {FormateDate(user?.grantedAt)}
+          </Typography>
+        </div>
+        {user?.accessLevel != "OWNER" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <Tooltip title="Edit Access" placement="left">
+              <EditIcon
+                style={{
+                  backgroundColor: theme.palette.primary.main,
+                  borderRadius: 5,
+                  padding: 5,
+                  color: theme.palette.common.white,
+                  width: 25,
+                }}
+              />
+            </Tooltip>
+
+            <Tooltip title="Remove Access" placement="left">
+              <DeleteIcon
+                style={{
+                  backgroundColor: theme.palette.primary.main,
+                  borderRadius: 5,
+                  padding: 5,
+                  alignSelf: "center",
+                  color: theme.palette.common.white,
+                  width: 25,
+                }}
+
+                onClick={()=>{
+                  deleteAccess(user?.id)
+                }}
+              />
+            </Tooltip>
+          </div>
+        )}
+      </Grid2>
+    ),
+    []
+  );
 
   return (
     <div
@@ -150,7 +286,6 @@ const APIManagement = ({ setSelectedPage, data }) => {
           flexDirection: "row",
           alignItems: "center",
           marginTop: 10,
-         
         }}
       >
         <Typography
@@ -161,7 +296,7 @@ const APIManagement = ({ setSelectedPage, data }) => {
             fontWeight: "bold",
             marginBottom: 0,
             fontSize: 20,
-            markerStart:15
+            markerStart: 15,
           }}
         >
           {data?.project?.name}
@@ -170,7 +305,7 @@ const APIManagement = ({ setSelectedPage, data }) => {
         <FormControl sx={{ m: 1, minWidth: 110, maxHeight: 40 }}>
           <InputLabel
             id="demo-simple-select-autowidth-label"
-            sx={{ maxHeight: 40,paddingTop:0, marginTop:0 }}
+            sx={{ maxHeight: 40, paddingTop: 0, marginTop: 0 }}
           >
             Enviroment
           </InputLabel>
@@ -189,6 +324,72 @@ const APIManagement = ({ setSelectedPage, data }) => {
           </Select>
         </FormControl>
       </div>
+
+      {!!error && (
+        <Alert variant="outlined" severity="error" sx={{ marginBottom: 3 }}>
+          {error}
+        </Alert>
+      )}
+
+      {!!success && (
+        <Alert variant="outlined" severity="success" sx={{ marginBottom: 3 }}>
+          {success}
+        </Alert>
+      )}
+
+      <Backdrop
+        sx={(theme) => ({ color: "#fff", zIndex: theme.zIndex.drawer + 1 })}
+        open={progress}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
+
+      <Card style={{ padding: 10, marginTop: 30, borderRadius: 10 }}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <Typography
+            gutterBottom
+            style={{
+              color: theme.palette.text.primary,
+              fontFamily: Fonts.roboto_mono,
+              fontWeight: "bold",
+              marginBottom: 10,
+              marginTop: 0,
+              fontSize: 15,
+            }}
+          >
+            Project Users :
+          </Typography>
+
+          <Button
+            onClick={() => {
+              setOpen(true);
+            }}
+            variant="contained"
+            color="primary"
+            sx={{marginBottom:1}}
+          >
+            Invite New User
+          </Button>
+        </div>
+        <InviteUserDialoug
+          onClose={handleClose}
+          open={open}
+          token={token}
+          refresh={getAllUsers}
+          projectId={data?.project?.id}
+        />
+        {/* user Cards */}
+        <Grid2 container spacing={3}>
+          {users.map(RenderItem)}
+        </Grid2>
+      </Card>
 
       <Grid2 container spacing={1} style={{ padding: 10, marginTop: 15 }}>
         {apiList.map((api, index) => (
@@ -380,7 +581,7 @@ const APIManagement = ({ setSelectedPage, data }) => {
                       width: 20,
                     }}
                     onClick={() => {
-                      setSelectedPage("test-api",data);
+                      setSelectedPage("test-api", data);
                     }}
                   />
                 </Tooltip>

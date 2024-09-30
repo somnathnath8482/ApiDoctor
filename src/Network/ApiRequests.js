@@ -247,3 +247,54 @@ export const GetRequest = (
       console.warn(err);
     });
 };
+
+
+
+export const DeleteRequestJson = (
+  api,
+  json,
+  progress,
+  header,
+  setSuccess,
+  setError,
+  response,
+  navigation
+) => {
+  progress && progress(true);
+  //console.log(file);
+  axios({
+    // Endpoint to send files
+    url: api,
+    method: "DELETE",
+    headers: {
+      // Add any auth token her
+      Authorization: "Bearer " + header,
+      "Content-Type": "application/json",
+    },
+
+    // Attaching the form data
+    data: json,
+  })
+    // Handle the response from backend here
+    .then((res) => {
+      progress && progress(false);
+      console.log(res);
+
+      if (res?.data?.code == 100) {
+        setError && setError(res.data?.message);
+        setSuccess && setSuccess(null);
+      } else {
+        setSuccess && setSuccess(res.data.message);
+        setError && setError(null);
+        response && response(res?.data);
+      }
+    })
+
+    // Catch errors if any
+    .catch((err) => {
+      progress && progress(false);
+      setError && setError(err.message);
+      setSuccess && setSuccess(null);
+      console.warn(err);
+    });
+};
