@@ -11,4 +11,6 @@ export const ApiUrls = {
   getProjects: BaseUrl + "projects",
   getProjectsAccess: BaseUrl + "projects/project-access/",
   addProjectsAccess: BaseUrl + "projects/project-access",
+  createApi: BaseUrl + "apis/create",
+  getApi: BaseUrl + "apis/",
 };

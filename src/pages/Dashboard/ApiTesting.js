@@ -1,6 +1,6 @@
 // ApiTesting.js
 
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   TextField,
   Button,
@@ -20,6 +20,9 @@ import {
   FormControlLabel,
   Switch,
   ListItemText,
+  Alert,
+  Backdrop,
+  CircularProgress,
 } from "@mui/material";
 import SaveIcon from "@mui/icons-material/Save";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -29,6 +32,9 @@ import "../../css/ConsoleBlock.css";
 import { Fonts } from "../../assets/fonts/Fonts";
 
 import AddIcon from "@mui/icons-material/Add";
+import { UserContext } from "../../context/MyContext";
+import { GetRequest, PostRequestJson } from "../../Network/ApiRequests";
+import { ApiUrls } from "../../Network/ApiUrls";
 const ApiTesting = ({ setSelectedPage, data }) => {
   const [method, setMethod] = useState("GET");
   const [endpoint, setEndPoint] = useState("");
@@ -40,7 +46,7 @@ const ApiTesting = ({ setSelectedPage, data }) => {
   const [contentType, setContentType] = useState("application/json");
   const [response, setResponse] = useState("");
   const [req, setReq] = useState("");
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState("");
   const [viewMode, setViewMode] = useState("raw");
 
   const [headerkey, setHeaderkey] = useState("");
@@ -52,6 +58,12 @@ const ApiTesting = ({ setSelectedPage, data }) => {
   const { env, projectId, projectName } = data;
 
   const theme = useTheme();
+
+
+  const { token } = useContext(UserContext);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
+  const [progress, setProgress] = useState(false);
 
 
 
@@ -90,6 +102,23 @@ const ApiTesting = ({ setSelectedPage, data }) => {
   };
 
   const handleSendRequest = async () => {
+
+
+    try {
+      const requestData = {
+        url: url,
+        method: method,
+        headers: headers,
+        type: contentType,
+        body: contentType == "application/json" ? body : formData,
+      };
+
+      setReq(formatRequest(requestData));
+    } catch(e){
+        console.log(e.message);
+    }
+
+
     try {
       const headersObject = headers.reduce((acc, header) => {
         if (header.key) acc[header.key] = header.value;
@@ -115,22 +144,85 @@ const ApiTesting = ({ setSelectedPage, data }) => {
 
       const res = await axios(config);
       setResponse(JSON.stringify(res.data, null, 2));
-      setError("");
+      setErrors("");
 
-      const requestData = {
-        url: url,
-        method: method,
-        headers: headers,
-        type: contentType,
-        body: contentType == "application/json" ? body : formData,
-      };
-
-      setReq(formatRequest(requestData));
+      
     } catch (err) {
-      setError(err.message);
+      setErrors(err.message);
       setResponse("");
     }
   };
+
+  const handleAddApi = () =>{
+
+    /* private String name;
+    private String endpoint;
+    private String method;
+    private List<HeaderRequest> headers;
+    private List<FormDataRequest> formdatas;
+    private AuthRequest authentication;
+    private Long projectId; */
+
+
+
+      const modifiedheader = headers.map(hdr => {
+        const { key, value } = hdr;
+        return { headerKey: key, headerValue: value };
+      });  
+      
+      const modifiedFormData = formData.map(frmdt => {
+        const { key, value } = frmdt;
+        return { formKey: key, formValue: value };
+      });
+
+
+
+
+
+    const requestData = {
+      "name":name,
+      "endpoint": url,
+      "projectId": projectId,
+      "method": method,
+      "authentication":{
+        "authType":"NONE",
+        "credentials":""
+      },
+    
+      "headers": modifiedheader,
+      "formdatas": modifiedFormData,
+      "jsonString": JSON.stringify(body),
+      "requestType": contentType == "application/json"?"JSON":"FORMDATA",
+    };
+
+   console.log(requestData)
+   GetRequest(
+      ApiUrls.getApi+"33",
+      requestData,
+      setProgress,
+      token,
+      setSuccess,
+      setError,
+      (res) => {
+        
+      },
+      null
+    );
+    
+    /* PostRequestJson(
+      ApiUrls.createApi,
+      requestData,
+      setProgress,
+      token,
+      setSuccess,
+      setError,
+      (res) => {
+        
+      },
+      null
+    ); */
+    
+  }
 
   const handleSaveResponse = () => {
     const blob = new Blob([response], { type: "text/plain" });
@@ -534,6 +626,8 @@ const ApiTesting = ({ setSelectedPage, data }) => {
           </Box>
         )}
       </Paper>
+      <div style={{flexDirection:'row', alignItems:'center'}}>
+
       <Button
         onClick={handleSendRequest}
         variant="contained"
@@ -542,6 +636,39 @@ const ApiTesting = ({ setSelectedPage, data }) => {
       >
         Send Request
       </Button>
+      
+      <Button
+        onClick={handleAddApi}
+        variant="contained"
+        color="primary"
+        sx={{ marginBottom: 2 }}
+      >
+        Add Api
+      </Button>
+      </div>
+
+
+      {!!error && (
+        <Alert variant="outlined" severity="error" sx={{ marginBottom: 3 }}>
+          {error}
+        </Alert>
+      )}
+
+      {!!success && (
+        <Alert variant="outlined" severity="success" sx={{ marginBottom: 3 }}>
+          {success}
+        </Alert>
+      )}
+
+      <Backdrop
+        sx={(theme) => ({ color: "#fff", zIndex: theme.zIndex.drawer + 1 })}
+        open={progress}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
+
+
+
       {req && (
         <Paper elevation={3} sx={{ padding: 2, borderRadius: 3 }}>
           <Typography variant="h6" gutterBottom>
@@ -599,9 +726,9 @@ const ApiTesting = ({ setSelectedPage, data }) => {
         </Paper>
       )}
 
-      {error && (
+      {errors && (
         <Typography color="error" variant="body1">
-          {error}
+          {errors}
         </Typography>
       )}
     </Box>
