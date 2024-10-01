@@ -109,6 +109,15 @@ const APIManagement = ({ setSelectedPage, data }) => {
     setOpen(false);
   };
 
+  const navigateToApi =()=>{
+    let obj = {
+      env:env.find(item => item.id ===selectedEnv),
+      projectId: data?.project?.id,
+      projectName: data?.project?.name
+    }
+    setSelectedPage("test-api",obj);
+  }
+
   const getAllUsers = () => {
     GetRequest(
       ApiUrls.getProjectsAccess + data?.project?.id,
@@ -126,7 +135,7 @@ const APIManagement = ({ setSelectedPage, data }) => {
 
   const deleteAccess = (id) => {
     DeleteRequestJson(
-      ApiUrls.getProjectsAccess +id,
+      ApiUrls.getProjectsAccess + id,
       {},
       setProgress,
       token,
@@ -222,9 +231,8 @@ const APIManagement = ({ setSelectedPage, data }) => {
                   color: theme.palette.common.white,
                   width: 25,
                 }}
-
-                onClick={()=>{
-                  deleteAccess(user?.id)
+                onClick={() => {
+                  deleteAccess(user?.id);
                 }}
               />
             </Tooltip>
@@ -373,7 +381,7 @@ const APIManagement = ({ setSelectedPage, data }) => {
             }}
             variant="contained"
             color="primary"
-            sx={{marginBottom:1}}
+            sx={{ marginBottom: 1 }}
           >
             Invite New User
           </Button>
@@ -391,7 +399,41 @@ const APIManagement = ({ setSelectedPage, data }) => {
         </Grid2>
       </Card>
 
-      <Grid2 container spacing={1} style={{ padding: 10, marginTop: 15 }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginTop:15,
+          marginBottom:0
+        }}
+      >
+        <Typography
+          gutterBottom
+          style={{
+            color: theme.palette.text.primary,
+            fontFamily: Fonts.roboto_mono,
+            fontWeight: "bold",
+            marginBottom: 10,
+            marginTop: 0,
+            fontSize: 15,
+          }}
+        >
+          Project APIS :
+        </Typography>
+
+        <Button
+          onClick={navigateToApi}
+          variant="contained"
+          color="primary"
+          sx={{ marginBottom: 1 }}
+        >
+          Add Apis
+        </Button>
+      </div>
+
+      <Grid2 container spacing={1} style={{ padding: 10, marginTop: 2 }}>
         {apiList.map((api, index) => (
           <Grid2 item key={index} size={6}>
             <Card
@@ -580,9 +622,7 @@ const APIManagement = ({ setSelectedPage, data }) => {
                       color: theme.palette.common.white,
                       width: 20,
                     }}
-                    onClick={() => {
-                      setSelectedPage("test-api", data);
-                    }}
+                    onClick={navigateToApi}
                   />
                 </Tooltip>
                 <Tooltip title="Edit API" placement="left">

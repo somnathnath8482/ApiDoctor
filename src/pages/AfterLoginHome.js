@@ -84,7 +84,7 @@ const AfterLoginHome = () => {
       case "settings":
         return <Settings />;
       case "test-api":
-        return <ApiTesting />;
+        return <ApiTesting data={data} setSelectedPage={handlePageChange}/>;
       case "invite-user":
         return <InviteUsers />;
       default:

@@ -1,6 +1,6 @@
 // ApiTesting.js
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   TextField,
   Button,
@@ -29,9 +29,11 @@ import "../../css/ConsoleBlock.css";
 import { Fonts } from "../../assets/fonts/Fonts";
 
 import AddIcon from "@mui/icons-material/Add";
-const ApiTesting = () => {
+const ApiTesting = ({ setSelectedPage, data }) => {
   const [method, setMethod] = useState("GET");
+  const [endpoint, setEndPoint] = useState("");
   const [url, setUrl] = useState("");
+  const [name, setName] = useState("");
   const [headers, setHeaders] = useState([]);
   const [body, setBody] = useState("");
   const [formData, setFormData] = useState([]);
@@ -47,7 +49,15 @@ const ApiTesting = () => {
   const [formDataKey, setFormDataKey] = useState("");
   const [formDataValue, setFormDataValue] = useState("");
 
+  const { env, projectId, projectName } = data;
+
   const theme = useTheme();
+
+
+
+  useEffect(()=>{
+    setUrl(env?.baseUrl+endpoint)
+  },[endpoint])
 
   const handleAddHeader = () => {
     setHeaders([...headers, { key: headerkey, value: headervalue }]);
@@ -80,7 +90,6 @@ const ApiTesting = () => {
   };
 
   const handleSendRequest = async () => {
-    
     try {
       const headersObject = headers.reduce((acc, header) => {
         if (header.key) acc[header.key] = header.value;
@@ -119,7 +128,7 @@ const ApiTesting = () => {
       setReq(formatRequest(requestData));
     } catch (err) {
       setError(err.message);
-      setResponse("")
+      setResponse("");
     }
   };
 
@@ -176,6 +185,7 @@ const ApiTesting = () => {
       >
         Api Testing
       </Typography>
+
       <div
         style={{
           flexDirection: "row",
@@ -200,60 +210,118 @@ const ApiTesting = () => {
         />
       </div>
 
+      <div
+        style={{
+          marginTop: 10,
+        }}
+      >
+        <Typography
+          gutterBottom
+          style={{
+            color: theme.palette.text.primary,
+            fontFamily: Fonts.roboto_mono,
+
+            marginBottom: 0,
+            fontSize: 20,
+            markerStart: 15,
+          }}
+        >
+          {projectName}
+        </Typography>
+
+        <Typography
+          gutterBottom
+          style={{
+            color: theme.palette.text.primary,
+            fontFamily: Fonts.roboto_mono,
+
+            marginBottom: 0,
+            fontSize: 15,
+            markerStart: 15,
+          }}
+        >
+          Enviromewnt: {env.name}
+        </Typography>
+      </div>
+
       <Paper
         elevation={3}
         sx={{
-          padding: 2,
-          marginBottom: 2,
-          display: "flex",
-          flexDirection: "row",
-          alignItems: "center",
-          gap: 2,
           marginTop: 5,
           borderRadius: 3,
+          display: "flex",
+          flexDirection: "column",
+          gap: 2,
+          padding: 2,
+          marginBottom: 2,
         }}
       >
-        <FormControl fullWidth style={{ flex: 0.2 }}>
-          <InputLabel
-            style={{ fontFamily: Fonts.roboto_mono }}
-            id="demo-simple-select-label"
-          >
-            HTTP Method
-          </InputLabel>
-          <Select
-            labelId="demo-simple-select-label"
-            id="demo-simple-select"
-            value={method}
-            label="Request Method"
-            style={{ fontFamily: Fonts.roboto_mono }}
-            onChange={(e) => setMethod(e.target.value)}
-          >
-            <MenuItem value="GET" style={{ fontFamily: Fonts.roboto_mono }}>
-              GET
-            </MenuItem>
-            <MenuItem value="POST" style={{ fontFamily: Fonts.roboto_mono }}>
-              POST
-            </MenuItem>
-            <MenuItem value="PUT" style={{ fontFamily: Fonts.roboto_mono }}>
-              PUT
-            </MenuItem>
-            <MenuItem value="DELETE" style={{ fontFamily: Fonts.roboto_mono }}>
-              DELETE
-            </MenuItem>
-          </Select>
-        </FormControl>
-
         <TextField
-          label="API Endpoint URL"
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
+          label="Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
           fullWidth={false}
           variant="outlined"
+          required
           style={{ flex: 1, fontFamily: Fonts.roboto_mono }}
         />
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent:'space-between'
+          }}
+        >
+          <FormControl fullWidth style={{ flex: 0.1 }}>
+            <InputLabel
+              style={{ fontFamily: Fonts.roboto_mono }}
+              id="demo-simple-select-label"
+            >
+              HTTP Method
+            </InputLabel>
+            <Select
+              labelId="demo-simple-select-label"
+              id="demo-simple-select"
+              value={method}
+              label="Request Method"
+              style={{ fontFamily: Fonts.roboto_mono }}
+              onChange={(e) => setMethod(e.target.value)}
+            >
+              <MenuItem value="GET" style={{ fontFamily: Fonts.roboto_mono }}>
+                GET
+              </MenuItem>
+              <MenuItem value="POST" style={{ fontFamily: Fonts.roboto_mono }}>
+                POST
+              </MenuItem>
+              <MenuItem value="PUT" style={{ fontFamily: Fonts.roboto_mono }}>
+                PUT
+              </MenuItem>
+              <MenuItem
+                value="DELETE"
+                style={{ fontFamily: Fonts.roboto_mono }}
+              >
+                DELETE
+              </MenuItem>
+            </Select>
+          </FormControl>
+
+          <TextField
+            label="API Endpoint URL"
+            value={endpoint}
+            onChange={(e) =>{ setEndPoint(e.target.value)}}
+            fullWidth={false}
+            variant="outlined"
+            placeholder={env?.baseUrl + "/**"}
+            style={{ flex: 0.895, fontFamily: Fonts.roboto_mono }}
+          />
+        </div>
       </Paper>
 
-      <Paper elevation={3} sx={{ padding: 2, marginBottom: 2 ,borderRadius: 3}}>
+      <Paper
+        elevation={3}
+        sx={{ padding: 2, marginBottom: 2, borderRadius: 3 }}
+      >
         <Typography
           style={{
             color: theme.palette.text.primary,
@@ -337,7 +405,10 @@ const ApiTesting = () => {
           ))}
         </List>
       </Paper>
-      <Paper elevation={3} sx={{ padding: 2, marginBottom: 2 ,borderRadius: 3,}}>
+      <Paper
+        elevation={3}
+        sx={{ padding: 2, marginBottom: 2, borderRadius: 3 }}
+      >
         <FormControl fullWidth style={{ flex: 0.2 }}>
           <InputLabel
             style={{ fontFamily: Fonts.roboto_mono }}
@@ -472,7 +543,7 @@ const ApiTesting = () => {
         Send Request
       </Button>
       {req && (
-        <Paper elevation={3} sx={{ padding: 2 ,borderRadius: 3,}}>
+        <Paper elevation={3} sx={{ padding: 2, borderRadius: 3 }}>
           <Typography variant="h6" gutterBottom>
             Request
           </Typography>
@@ -489,7 +560,7 @@ const ApiTesting = () => {
       )}
 
       {response && (
-        <Paper elevation={3} sx={{ padding: 2,marginTop:5 ,borderRadius: 3,}}>
+        <Paper elevation={3} sx={{ padding: 2, marginTop: 5, borderRadius: 3 }}>
           <Typography variant="h6" gutterBottom>
             Response
           </Typography>
