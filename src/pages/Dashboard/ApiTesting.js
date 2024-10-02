@@ -40,9 +40,12 @@ import {
 } from "../../Network/ApiRequests";
 import { ApiUrls } from "../../Network/ApiUrls";
 const ApiTesting = ({ setSelectedPage, data }) => {
+
+  console.log(data);
+
   const { env, projectId, projectName, selectedApipt } = data;
 
-  const [selectedApi,setSelectedApi] = useState(selectedApipt);
+  const [selectedApi, setSelectedApi] = useState(selectedApipt);
 
   const [method, setMethod] = useState(
     selectedApi?.method ? selectedApi.method : "GET"
@@ -52,16 +55,36 @@ const ApiTesting = ({ setSelectedPage, data }) => {
   );
   const [url, setUrl] = useState("");
   const [name, setName] = useState(selectedApi ? selectedApi.name : "");
-  const [description, setDescription] = useState(selectedApi ? selectedApi.description : "");
-  const [headers, setHeaders] = useState(
-    selectedApi?.headers ? selectedApi.headers : []
+  const [description, setDescription] = useState(
+    selectedApi ? selectedApi.description : ""
   );
+  const [headers, setHeaders] = useState([]);
+  const [formData, setFormData] = useState([]);
+
+  useEffect(() => {
+    if (selectedApi?.headers) {
+      const modifiedheader = selectedApi?.headers.map((hdr) => {
+        const { headerKey, headerValue } = hdr;
+        return { key: headerKey, value: headerValue };
+      });
+
+      setHeaders(modifiedheader);
+    }
+
+    if (selectedApi?.formdatas) {
+      const modifiedFormData = selectedApi?.formdatas.map((frmdt) => {
+        const { formKey, formValue } = frmdt;
+        return { key: formKey, value: formValue };
+      });
+
+      setFormData(modifiedFormData);
+    }
+  }, [selectedApi]);
+
   const [body, setBody] = useState(
     selectedApi?.jsonString ? JSON.parse(selectedApi.jsonString) : ""
   );
-  const [formData, setFormData] = useState(
-    selectedApi?.formdatas ? selectedApi.formdatas : []
-  );
+
   const [contentType, setContentType] = useState(
     selectedApi
       ? selectedApi.requestType == "JSON"
@@ -188,7 +211,7 @@ const ApiTesting = ({ setSelectedPage, data }) => {
     });
 
     const requestData = {
-      id:selectedApi?selectedApi.id:0,
+      id: selectedApi ? selectedApi.id : 0,
       name: name,
       description: description,
       endpoint: endpoint,
@@ -227,7 +250,7 @@ const ApiTesting = ({ setSelectedPage, data }) => {
       setSuccess,
       setError,
       (res) => {
-        setSelectedApi(res?.data)
+        setSelectedApi(res?.data);
       },
       null
     );
@@ -366,7 +389,7 @@ const ApiTesting = ({ setSelectedPage, data }) => {
           required
           style={{ flex: 1, fontFamily: Fonts.roboto_mono }}
         />
-        
+
         <TextField
           label="Description"
           value={description}
@@ -661,9 +684,9 @@ const ApiTesting = ({ setSelectedPage, data }) => {
           onClick={handleAddApi}
           variant="contained"
           color="primary"
-          sx={{ marginBottom: 2, marginStart:10 }}
+          sx={{ marginBottom: 2, marginStart: 10 }}
         >
-          {selectedApi?"Update Api": "Add Api"}
+          {selectedApi ? "Update Api" : "Add Api"}
         </Button>
       </div>
 

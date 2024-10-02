@@ -62,14 +62,11 @@ const APIManagement = ({ setSelectedPage, data }) => {
       env: env.find((item) => item.id === selectedEnv),
       projectId: data?.project?.id,
       projectName: data?.project?.name,
-      
     };
 
-    if(api!=null && api!=undefined)
-      {
-      obj.selectedApipt =  api;
+    if (api != null && api != undefined) {
+      obj.selectedApipt = api;
     }
-
 
     setSelectedPage("test-api", obj);
   };
@@ -411,7 +408,9 @@ const APIManagement = ({ setSelectedPage, data }) => {
         </Typography>
 
         <Button
-          onClick={navigateToApi}
+          onClick={() => {
+            navigateToApi(null);
+          }}
           variant="contained"
           color="primary"
           sx={{ marginBottom: 1 }}
@@ -442,7 +441,7 @@ const APIManagement = ({ setSelectedPage, data }) => {
                     fontFamily: Fonts.roboto_mono,
                   }}
                 >
-                  {api.description?api.description:api.name}
+                  {api.description ? api.description : api.name}
                 </Typography>
                 <Typography
                   variant="h7"
@@ -543,7 +542,7 @@ const APIManagement = ({ setSelectedPage, data }) => {
                           fontFamily: Fonts.roboto_mono,
                         }}
                       >
-                        {api.headers.size}
+                        {api.headers.length}
                       </Typography>
                     </Typography>
 
