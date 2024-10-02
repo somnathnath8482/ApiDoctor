@@ -40,9 +40,6 @@ import {
 } from "../../Network/ApiRequests";
 import { ApiUrls } from "../../Network/ApiUrls";
 const ApiTesting = ({ setSelectedPage, data }) => {
-
-  console.log(data);
-
   const { env, projectId, projectName, selectedApipt } = data;
 
   const [selectedApi, setSelectedApi] = useState(selectedApipt);
@@ -145,6 +142,11 @@ const ApiTesting = ({ setSelectedPage, data }) => {
   };
 
   const handleSendRequest = async () => {
+    if (selectedApi == null || selectedApi == undefined) {
+      alert("Please save The Api before Sending Request");
+      return;
+    }
+
     try {
       const requestData = {
         url: url,
@@ -156,7 +158,7 @@ const ApiTesting = ({ setSelectedPage, data }) => {
 
       setReq(formatRequest(requestData));
     } catch (e) {
-      console.log(e.message);
+     
     }
 
     try {
@@ -180,11 +182,32 @@ const ApiTesting = ({ setSelectedPage, data }) => {
         data,
       };
 
-      console.log(config);
+      const startTime = new Date().getTime();
 
-      const res = await axios(config);
-      setResponse(JSON.stringify(res.data, null, 2));
-      setErrors("");
+      try{
+
+      
+      await axios(config)
+        .then((res) => {
+          const endTime = new Date().getTime();
+          const responseTime = endTime - startTime;
+          const statusCode = res.status;
+
+          setResponse(JSON.stringify(res.data, null, 2));
+          setErrors("");
+
+          handleAddAnalitics(responseTime, "N", projectId, selectedApi?.id);
+        });
+      }catch (err) {
+        //this is only for newtwork error except 200 code
+        setErrors(err.message);
+        setResponse("");
+        const endTime = new Date().getTime();
+        const responseTime = endTime - startTime;
+        handleAddAnalitics(responseTime, "Y", projectId, selectedApi?.id);
+       
+      }
+
     } catch (err) {
       setErrors(err.message);
       setResponse("");
@@ -252,6 +275,26 @@ const ApiTesting = ({ setSelectedPage, data }) => {
       (res) => {
         setSelectedApi(res?.data);
       },
+      null
+    );
+  };
+
+  const handleAddAnalitics = (time, status, projectId, apiId) => {
+    const requestData = {
+      response_time: time,
+      is_error: status,
+      project_id: projectId,
+      api_id: apiId,
+    };
+
+    PostRequestJson(
+      ApiUrls.addApiUsesAnalitics,
+      requestData,
+      null,
+      token,
+      null,
+      null,
+      (res) => {},
       null
     );
   };

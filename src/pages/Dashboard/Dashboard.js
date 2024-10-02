@@ -30,8 +30,8 @@ const Dashboard = ({ setSelectedPage }) => {
   const theme = useTheme();
   const { token } = useContext(UserContext);
 
-  const [projects,setProjects] = useState([])
- /*  const projects = [
+  const [projects, setProjects] = useState([]);
+  /*  const projects = [
     {
       id: 1,
       name: "API Management Platform",
@@ -48,13 +48,13 @@ const Dashboard = ({ setSelectedPage }) => {
   const [progress, setProgress] = useState(false);
 
   const handleViewApis = (access) => {
-    setSelectedPage("api-management",access);
+    setSelectedPage("api-management", access);
     // Navigate to API management page
   };
 
   const handleDelete = (projectId) => {
     console.log(`Adding API for project ${projectId}`);
-    
+
     // Navigate to add API form
   };
 
@@ -71,9 +71,7 @@ const Dashboard = ({ setSelectedPage }) => {
       null,
       setError,
       (res) => {
-
         setProjects(res?.data);
-
       },
       null
     );
@@ -85,83 +83,78 @@ const Dashboard = ({ setSelectedPage }) => {
 
   const RenderItem = useCallback((access) => {
     return (
-    <Grid2
-      item
-      key={access.project.id}
-      style={{
-        borderWidth: 1,
-        borderColor: theme.palette.primary.light,
-        borderStyle: "solid",
-        borderRadius: 10,
-        padding: 10,
-        flexDirection: "row",
-        display: "flex",
-      }}
-      size={4}
-    >
-      <div style={{ flex: 1 }}>
-        <Typography
-          variant="h7"
-          style={{ fontFamily: Fonts.roboto_mono }}
-        >
-          {access.project.name}
-        </Typography>
-        <Typography
-          color="textSecondary"
-          gutterBottom
-          style={{
-            marginTop: 5,
-            fontSize: 12,
-            fontFamily: Fonts.roboto_mono,
-          }}
-        >
-          {access.project.description}
-        </Typography>
-        <Typography
-          variant="body2"
-          style={{ marginTop: 5, fontFamily: Fonts.roboto_mono }}
-        >
-          Environments: {access.project.environments.length}
-        </Typography>
-        <Typography
-          variant="body2"
-          style={{ fontFamily: Fonts.roboto_mono }}
-        >
-          Created On: {FormateDate(access.project.createdAt)}
-        </Typography>
-      </div>
-      <div
-        style={{ display: "flex", flexDirection: "column", gap: 10 }}
+      <Grid2
+        item
+        key={access.project.id}
+        style={{
+          borderWidth: 1,
+          borderColor: theme.palette.primary.light,
+          borderStyle: "solid",
+          borderRadius: 10,
+          padding: 10,
+          flexDirection: "row",
+          display: "flex",
+        }}
+        size={4}
       >
-        <Tooltip title="View APIS" placement="left">
-          <RemoveRedEyeOutlinedIcon
+        <div style={{ flex: 1 }}>
+          <Typography variant="h7" style={{ fontFamily: Fonts.roboto_mono }}>
+            {access.project.name}
+          </Typography>
+          <Typography
+            color="textSecondary"
+            gutterBottom
             style={{
-              backgroundColor: theme.palette.primary.main,
-              borderRadius: 5,
-              padding: 5,
-              color: theme.palette.common.white,
-              width: 25,
+              marginTop: 5,
+              fontSize: 12,
+              fontFamily: Fonts.roboto_mono,
             }}
-            onClick={()=>{handleViewApis(access)}}
-          />
-        </Tooltip>
+          >
+            {access.project.description}
+          </Typography>
+          <Typography
+            variant="body2"
+            style={{ marginTop: 5, fontFamily: Fonts.roboto_mono }}
+          >
+            Environments: {access.project.environments.length}
+          </Typography>
+          <Typography variant="body2" style={{ fontFamily: Fonts.roboto_mono }}>
+            Created On: {FormateDate(access.project.createdAt)}
+          </Typography>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <Tooltip title="View APIS" placement="left">
+            <RemoveRedEyeOutlinedIcon
+              style={{
+                backgroundColor: theme.palette.primary.main,
+                borderRadius: 5,
+                padding: 5,
+                color: theme.palette.common.white,
+                width: 25,
+              }}
+              onClick={() => {
+                handleViewApis(access);
+              }}
+            />
+          </Tooltip>
 
-        <Tooltip title="Delete Project" placement="left">
-          <DeleteIcon
-            style={{
-              backgroundColor: theme.palette.primary.main,
-              borderRadius: 5,
-              padding: 5,
-              alignSelf: "center",  
-              color: theme.palette.common.white,
-              width: 25,
-            }}
-            onClick={handleDelete}
-          />
-        </Tooltip>
-      </div>
-    </Grid2>
-  )},[])
+          <Tooltip title="Delete Project" placement="left">
+            <DeleteIcon
+              style={{
+                backgroundColor: theme.palette.primary.main,
+                borderRadius: 5,
+                padding: 5,
+                alignSelf: "center",
+                color: theme.palette.common.white,
+                width: 25,
+              }}
+              onClick={handleDelete}
+            />
+          </Tooltip>
+        </div>
+      </Grid2>
+    );
+  }, []);
 
   return (
     <div
@@ -237,7 +230,12 @@ const Dashboard = ({ setSelectedPage }) => {
             Add new Project
           </Button>
         </div>
-        <AddProjectDialog onClose={handleClose} open={open} token={token} refresh={getAllProject} />
+        <AddProjectDialog
+          onClose={handleClose}
+          open={open}
+          token={token}
+          refresh={getAllProject}
+        />
 
         {/* Project Cards */}
         <Grid2 container spacing={3}>
@@ -278,7 +276,40 @@ const Dashboard = ({ setSelectedPage }) => {
         >
           Your Project Frequency :
         </Typography>
-        <BasicPie />
+        <div style={{ display: "flex", flexDirection: "row" }}>
+          <div style={{ flex: 1 }}>
+            <Typography
+              gutterBottom
+              style={{
+                color: theme.palette.text.primary,
+                fontFamily: Fonts.roboto_mono,
+                fontWeight: "bold",
+                marginBottom: 10,
+                marginTop: 0,
+                fontSize: 13,
+              }}
+            >
+              Number of Apis:
+            </Typography>
+            <BasicPie />
+          </div>
+          <div style={{ flex: 1 }}>
+            <Typography
+              gutterBottom
+              style={{
+                color: theme.palette.text.primary,
+                fontFamily: Fonts.roboto_mono,
+                fontWeight: "bold",
+                marginBottom: 10,
+                marginTop: 0,
+                fontSize: 13,
+              }}
+            >
+              Number of Requests:
+            </Typography>
+            <BasicPie />
+          </div>
+        </div>
       </Card>
 
       {/* API Summary - Optional */}
