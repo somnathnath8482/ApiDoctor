@@ -33,17 +33,42 @@ import { Fonts } from "../../assets/fonts/Fonts";
 
 import AddIcon from "@mui/icons-material/Add";
 import { UserContext } from "../../context/MyContext";
-import { GetRequest, PostRequestJson } from "../../Network/ApiRequests";
+import {
+  DeleteRequestJson,
+  GetRequest,
+  PostRequestJson,
+} from "../../Network/ApiRequests";
 import { ApiUrls } from "../../Network/ApiUrls";
 const ApiTesting = ({ setSelectedPage, data }) => {
-  const [method, setMethod] = useState("GET");
-  const [endpoint, setEndPoint] = useState("");
+  const { env, projectId, projectName, selectedApipt } = data;
+
+  const [selectedApi,setSelectedApi] = useState(selectedApipt);
+
+  const [method, setMethod] = useState(
+    selectedApi?.method ? selectedApi.method : "GET"
+  );
+  const [endpoint, setEndPoint] = useState(
+    selectedApi ? selectedApi.endpoint : ""
+  );
   const [url, setUrl] = useState("");
-  const [name, setName] = useState("");
-  const [headers, setHeaders] = useState([]);
-  const [body, setBody] = useState("");
-  const [formData, setFormData] = useState([]);
-  const [contentType, setContentType] = useState("application/json");
+  const [name, setName] = useState(selectedApi ? selectedApi.name : "");
+  const [description, setDescription] = useState(selectedApi ? selectedApi.description : "");
+  const [headers, setHeaders] = useState(
+    selectedApi?.headers ? selectedApi.headers : []
+  );
+  const [body, setBody] = useState(
+    selectedApi?.jsonString ? JSON.parse(selectedApi.jsonString) : ""
+  );
+  const [formData, setFormData] = useState(
+    selectedApi?.formdatas ? selectedApi.formdatas : []
+  );
+  const [contentType, setContentType] = useState(
+    selectedApi
+      ? selectedApi.requestType == "JSON"
+        ? "application/json"
+        : "multipart/form-data"
+      : "application/json"
+  );
   const [response, setResponse] = useState("");
   const [req, setReq] = useState("");
   const [errors, setErrors] = useState("");
@@ -55,21 +80,16 @@ const ApiTesting = ({ setSelectedPage, data }) => {
   const [formDataKey, setFormDataKey] = useState("");
   const [formDataValue, setFormDataValue] = useState("");
 
-  const { env, projectId, projectName } = data;
-
   const theme = useTheme();
-
 
   const { token } = useContext(UserContext);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [progress, setProgress] = useState(false);
 
-
-
-  useEffect(()=>{
-    setUrl(env?.baseUrl+endpoint)
-  },[endpoint])
+  useEffect(() => {
+    setUrl(env?.baseUrl + endpoint);
+  }, [endpoint]);
 
   const handleAddHeader = () => {
     setHeaders([...headers, { key: headerkey, value: headervalue }]);
@@ -102,8 +122,6 @@ const ApiTesting = ({ setSelectedPage, data }) => {
   };
 
   const handleSendRequest = async () => {
-
-
     try {
       const requestData = {
         url: url,
@@ -114,10 +132,9 @@ const ApiTesting = ({ setSelectedPage, data }) => {
       };
 
       setReq(formatRequest(requestData));
-    } catch(e){
-        console.log(e.message);
+    } catch (e) {
+      console.log(e.message);
     }
-
 
     try {
       const headersObject = headers.reduce((acc, header) => {
@@ -145,16 +162,13 @@ const ApiTesting = ({ setSelectedPage, data }) => {
       const res = await axios(config);
       setResponse(JSON.stringify(res.data, null, 2));
       setErrors("");
-
-      
     } catch (err) {
       setErrors(err.message);
       setResponse("");
     }
   };
 
-  const handleAddApi = () =>{
-
+  const handleAddApi = () => {
     /* private String name;
     private String endpoint;
     private String method;
@@ -163,39 +177,35 @@ const ApiTesting = ({ setSelectedPage, data }) => {
     private AuthRequest authentication;
     private Long projectId; */
 
+    const modifiedheader = headers.map((hdr) => {
+      const { key, value } = hdr;
+      return { headerKey: key, headerValue: value };
+    });
 
-
-      const modifiedheader = headers.map(hdr => {
-        const { key, value } = hdr;
-        return { headerKey: key, headerValue: value };
-      });  
-      
-      const modifiedFormData = formData.map(frmdt => {
-        const { key, value } = frmdt;
-        return { formKey: key, formValue: value };
-      });
-
-
-
-
+    const modifiedFormData = formData.map((frmdt) => {
+      const { key, value } = frmdt;
+      return { formKey: key, formValue: value };
+    });
 
     const requestData = {
-      "name":name,
-      "endpoint": url,
-      "projectId": projectId,
-      "method": method,
-      "authentication":{
-        "authType":"NONE",
-        "credentials":""
+      id:selectedApi?selectedApi.id:0,
+      name: name,
+      description: description,
+      endpoint: endpoint,
+      projectId: projectId,
+      method: method,
+      authentication: {
+        authType: "NONE",
+        credentials: "",
       },
-    
-      "headers": modifiedheader,
-      "formdatas": modifiedFormData,
-      "jsonString": JSON.stringify(body),
-      "requestType": contentType == "application/json"?"JSON":"FORMDATA",
+
+      headers: modifiedheader,
+      formdatas: modifiedFormData,
+      jsonString: JSON.stringify(body),
+      requestType: contentType == "application/json" ? "JSON" : "FORMDATA",
     };
 
-   console.log(requestData)
+    /*   console.log(requestData)
    GetRequest(
       ApiUrls.getApi+"33",
       requestData,
@@ -207,9 +217,9 @@ const ApiTesting = ({ setSelectedPage, data }) => {
         
       },
       null
-    );
-    
-    /* PostRequestJson(
+    ); */
+
+    PostRequestJson(
       ApiUrls.createApi,
       requestData,
       setProgress,
@@ -217,12 +227,11 @@ const ApiTesting = ({ setSelectedPage, data }) => {
       setSuccess,
       setError,
       (res) => {
-        
+        setSelectedApi(res?.data)
       },
       null
-    ); */
-    
-  }
+    );
+  };
 
   const handleSaveResponse = () => {
     const blob = new Blob([response], { type: "text/plain" });
@@ -357,12 +366,22 @@ const ApiTesting = ({ setSelectedPage, data }) => {
           required
           style={{ flex: 1, fontFamily: Fonts.roboto_mono }}
         />
+        
+        <TextField
+          label="Description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          fullWidth={false}
+          variant="outlined"
+          required
+          style={{ flex: 1, fontFamily: Fonts.roboto_mono }}
+        />
         <div
           style={{
             display: "flex",
             flexDirection: "row",
             alignItems: "center",
-            justifyContent:'space-between'
+            justifyContent: "space-between",
           }}
         >
           <FormControl fullWidth style={{ flex: 0.1 }}>
@@ -401,7 +420,9 @@ const ApiTesting = ({ setSelectedPage, data }) => {
           <TextField
             label="API Endpoint URL"
             value={endpoint}
-            onChange={(e) =>{ setEndPoint(e.target.value)}}
+            onChange={(e) => {
+              setEndPoint(e.target.value);
+            }}
             fullWidth={false}
             variant="outlined"
             placeholder={env?.baseUrl + "/**"}
@@ -626,27 +647,25 @@ const ApiTesting = ({ setSelectedPage, data }) => {
           </Box>
         )}
       </Paper>
-      <div style={{flexDirection:'row', alignItems:'center'}}>
+      <div style={{ flexDirection: "row", alignItems: "center" }}>
+        <Button
+          onClick={handleSendRequest}
+          variant="contained"
+          color="primary"
+          sx={{ marginBottom: 2 }}
+        >
+          Send Request
+        </Button>
 
-      <Button
-        onClick={handleSendRequest}
-        variant="contained"
-        color="primary"
-        sx={{ marginBottom: 2 }}
-      >
-        Send Request
-      </Button>
-      
-      <Button
-        onClick={handleAddApi}
-        variant="contained"
-        color="primary"
-        sx={{ marginBottom: 2 }}
-      >
-        Add Api
-      </Button>
+        <Button
+          onClick={handleAddApi}
+          variant="contained"
+          color="primary"
+          sx={{ marginBottom: 2, marginStart:10 }}
+        >
+          {selectedApi?"Update Api": "Add Api"}
+        </Button>
       </div>
-
 
       {!!error && (
         <Alert variant="outlined" severity="error" sx={{ marginBottom: 3 }}>
@@ -666,8 +685,6 @@ const ApiTesting = ({ setSelectedPage, data }) => {
       >
         <CircularProgress color="inherit" />
       </Backdrop>
-
-
 
       {req && (
         <Paper elevation={3} sx={{ padding: 2, borderRadius: 3 }}>

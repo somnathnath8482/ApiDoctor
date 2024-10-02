@@ -33,59 +33,6 @@ import { UserContext } from "../../context/MyContext";
 import { FormateDate } from "../../utill/Helper";
 import BlockIcon from "@mui/icons-material/Block";
 import InviteUserDialoug from "./InviteUserDialoug";
-const apiList = [
-  {
-    name: "Get Users",
-    description: "Fetches a list of users from the database.",
-    endpoint: "/api/v1/users",
-    requestType: "GET",
-    contentType: "JSON",
-    headersCount: 3,
-    createdDate: "2024-09-15",
-    status: "Active",
-  },
-  {
-    name: "Create User",
-    description: "Creates a new user and stores it in the database.",
-    endpoint: "/api/v1/users/create",
-    requestType: "POST",
-    contentType: "FormData",
-    headersCount: 2,
-    createdDate: "2024-09-10",
-    status: "Inactive",
-  },
-  {
-    name: "Create User",
-    description: "Creates a new user and stores it in the database.",
-    endpoint: "/api/v1/users/create",
-    requestType: "POST",
-    contentType: "FormData",
-    headersCount: 2,
-    createdDate: "2024-09-10",
-    status: "Inactive",
-  },
-  {
-    name: "Create User",
-    description: "Creates a new user and stores it in the database.",
-    endpoint: "/api/v1/users/create",
-    requestType: "POST",
-    contentType: "FormData",
-    headersCount: 2,
-    createdDate: "2024-09-10",
-    status: "Inactive",
-  },
-  {
-    name: "Create User",
-    description: "Creates a new user and stores it in the database.",
-    endpoint: "/api/v1/users/create",
-    requestType: "POST",
-    contentType: "FormData",
-    headersCount: 2,
-    createdDate: "2024-09-10",
-    status: "Inactive",
-  },
-  // Add more API details as needed
-];
 
 const APIManagement = ({ setSelectedPage, data }) => {
   const [expanded, setExpanded] = useState(null);
@@ -99,6 +46,7 @@ const APIManagement = ({ setSelectedPage, data }) => {
   const [success, setSuccess] = useState(null);
   const [progress, setProgress] = useState(false);
   const [open, setOpen] = useState(false);
+  const [apiList, setApiList] = useState([]);
 
   const theme = useTheme();
   const handleToggleExpand = (index) => {
@@ -109,14 +57,22 @@ const APIManagement = ({ setSelectedPage, data }) => {
     setOpen(false);
   };
 
-  const navigateToApi =()=>{
+  const navigateToApi = (api) => {
     let obj = {
-      env:env.find(item => item.id ===selectedEnv),
+      env: env.find((item) => item.id === selectedEnv),
       projectId: data?.project?.id,
-      projectName: data?.project?.name
+      projectName: data?.project?.name,
+      
+    };
+
+    if(api!=null && api!=undefined)
+      {
+      obj.selectedApipt =  api;
     }
-    setSelectedPage("test-api",obj);
-  }
+
+
+    setSelectedPage("test-api", obj);
+  };
 
   const getAllUsers = () => {
     GetRequest(
@@ -128,6 +84,21 @@ const APIManagement = ({ setSelectedPage, data }) => {
       setError,
       (res) => {
         setUsers(res?.data);
+      },
+      null
+    );
+  };
+
+  const getAllApis = () => {
+    GetRequest(
+      ApiUrls.getApisOfProject + data?.project?.id,
+      {},
+      setProgress,
+      token,
+      null,
+      setError,
+      (res) => {
+        setApiList(res?.data?.data);
       },
       null
     );
@@ -148,6 +119,21 @@ const APIManagement = ({ setSelectedPage, data }) => {
     );
   };
 
+  const handleDeleteApi = (id) => {
+    DeleteRequestJson(
+      ApiUrls.deleteApi + id,
+      {},
+      setProgress,
+      token,
+      setSuccess,
+      setError,
+      (res) => {
+        getAllApis();
+      },
+      null
+    );
+  };
+
   useEffect(() => {
     if (data != null || data != "") {
     } else {
@@ -155,6 +141,7 @@ const APIManagement = ({ setSelectedPage, data }) => {
     }
 
     getAllUsers();
+    getAllApis();
   }, []);
 
   const handleChangeEnv = (e) => {
@@ -405,8 +392,8 @@ const APIManagement = ({ setSelectedPage, data }) => {
           flexDirection: "row",
           alignItems: "center",
           justifyContent: "space-between",
-          marginTop:15,
-          marginBottom:0
+          marginTop: 15,
+          marginBottom: 0,
         }}
       >
         <Typography
@@ -434,7 +421,7 @@ const APIManagement = ({ setSelectedPage, data }) => {
       </div>
 
       <Grid2 container spacing={1} style={{ padding: 10, marginTop: 2 }}>
-        {apiList.map((api, index) => (
+        {apiList?.map((api, index) => (
           <Grid2 item key={index} size={6}>
             <Card
               style={{ padding: 10, display: "flex", flexDirection: "row" }}
@@ -455,7 +442,7 @@ const APIManagement = ({ setSelectedPage, data }) => {
                     fontFamily: Fonts.roboto_mono,
                   }}
                 >
-                  {api.description}
+                  {api.description?api.description:api.name}
                 </Typography>
                 <Typography
                   variant="h7"
@@ -509,7 +496,7 @@ const APIManagement = ({ setSelectedPage, data }) => {
                           fontFamily: Fonts.roboto_mono,
                         }}
                       >
-                        {api.requestType}
+                        {api.method}
                       </Typography>
                     </Typography>
 
@@ -533,7 +520,7 @@ const APIManagement = ({ setSelectedPage, data }) => {
                           fontFamily: Fonts.roboto_mono,
                         }}
                       >
-                        {api.contentType}
+                        {api.requestType}
                       </Typography>
                     </Typography>
                     <Typography
@@ -556,7 +543,7 @@ const APIManagement = ({ setSelectedPage, data }) => {
                           fontFamily: Fonts.roboto_mono,
                         }}
                       >
-                        {api.headersCount}
+                        {api.headers.size}
                       </Typography>
                     </Typography>
 
@@ -580,7 +567,7 @@ const APIManagement = ({ setSelectedPage, data }) => {
                           fontFamily: Fonts.roboto_mono,
                         }}
                       >
-                        {api.createdDate}
+                        {FormateDate(api.createdAt)}
                       </Typography>
                     </Typography>
 
@@ -604,7 +591,7 @@ const APIManagement = ({ setSelectedPage, data }) => {
                           fontFamily: Fonts.roboto_mono,
                         }}
                       >
-                        {api.status}
+                        Active
                       </Typography>
                     </Typography>
                   </div>
@@ -613,7 +600,7 @@ const APIManagement = ({ setSelectedPage, data }) => {
               <div
                 style={{ display: "flex", flexDirection: "column", gap: 10 }}
               >
-                <Tooltip title="Test APIS" placement="left">
+                <Tooltip title="Test/Edit API" placement="left">
                   <BiotechIcon
                     style={{
                       backgroundColor: theme.palette.primary.main,
@@ -622,17 +609,8 @@ const APIManagement = ({ setSelectedPage, data }) => {
                       color: theme.palette.common.white,
                       width: 20,
                     }}
-                    onClick={navigateToApi}
-                  />
-                </Tooltip>
-                <Tooltip title="Edit API" placement="left">
-                  <EditIcon
-                    style={{
-                      backgroundColor: theme.palette.primary.main,
-                      borderRadius: 5,
-                      padding: 5,
-                      color: theme.palette.common.white,
-                      width: 20,
+                    onClick={() => {
+                      navigateToApi(api);
                     }}
                   />
                 </Tooltip>
@@ -645,6 +623,9 @@ const APIManagement = ({ setSelectedPage, data }) => {
                       padding: 5,
                       color: theme.palette.common.white,
                       width: 20,
+                    }}
+                    onClick={() => {
+                      handleDeleteApi(api.id);
                     }}
                   />
                 </Tooltip>
