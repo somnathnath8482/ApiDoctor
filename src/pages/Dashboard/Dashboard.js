@@ -31,21 +31,19 @@ const Dashboard = ({ setSelectedPage }) => {
   const { token } = useContext(UserContext);
 
   const [projects, setProjects] = useState([]);
-  /*  const projects = [
-    {
-      id: 1,
-      name: "API Management Platform",
-      description: "Manage, test, and monitor APIs efficiently.",
-      apiCount: 12,
-      lastUpdated: "2024-09-10",
-    }
-    // Add more projects here
-  ]; */
-  const [open, setOpen] = useState(false);
+ const [open, setOpen] = useState(false);
 
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [progress, setProgress] = useState(false);
+
+  const [apiStaistics,setApiStatistics] = useState([]);
+
+  const [noOfApis,setNoOfApis] = useState([]);
+  const [noOfRequest,setNoOfRequest] = useState([]);
+
+
+
 
   const handleViewApis = (access) => {
     setSelectedPage("api-management", access);
@@ -76,9 +74,50 @@ const Dashboard = ({ setSelectedPage }) => {
       null
     );
   };
+  
+  const getStatistics = () => {
+    GetRequest(
+      ApiUrls.getStatistics,
+      {},
+      setProgress,
+      token,
+      null,
+      setError,
+      (res) => {
+        setApiStatistics(res?.data?.apis)
+
+
+        let proj =res?.data?.projects;
+        let req = [];
+        let apis = [];
+
+        proj.map((item)=>{
+
+          req.push(
+            { id: item.id, value: item.requestCount, label: item.name },
+          )  
+          apis.push(
+            { id: item.id, value: item.apiCount, label: item.name },
+          )
+
+        })
+
+        console.log(apis)
+        console.log(req)
+
+        setNoOfApis(apis);
+        setNoOfRequest(req);
+
+
+
+      },
+      null
+    );
+  };
 
   useEffect(() => {
     getAllProject();
+    getStatistics();
   }, []);
 
   const RenderItem = useCallback((access) => {
@@ -291,7 +330,7 @@ const Dashboard = ({ setSelectedPage }) => {
             >
               Number of Apis:
             </Typography>
-            <BasicPie />
+            <BasicPie data ={noOfApis} />
           </div>
           <div style={{ flex: 1 }}>
             <Typography
@@ -307,7 +346,7 @@ const Dashboard = ({ setSelectedPage }) => {
             >
               Number of Requests:
             </Typography>
-            <BasicPie />
+            <BasicPie data = {noOfRequest} />
           </div>
         </div>
       </Card>
@@ -331,7 +370,7 @@ const Dashboard = ({ setSelectedPage }) => {
 
         <List
           itemLayout="horizontal"
-          dataSource={projects}
+          dataSource={apiStaistics}
           renderItem={(item) => (
             <List.Item
               style={{
@@ -356,6 +395,8 @@ const Dashboard = ({ setSelectedPage }) => {
                       gap: 10,
                     }}
                   >
+                   
+
                     <Typography
                       gutterBottom
                       style={{
@@ -366,7 +407,7 @@ const Dashboard = ({ setSelectedPage }) => {
                         fontSize: 14,
                       }}
                     >
-                      Total APIs :{item.apiCount}
+                      Total Requests : {item.totalRequests}
                     </Typography>
 
                     <Typography
@@ -379,7 +420,7 @@ const Dashboard = ({ setSelectedPage }) => {
                         fontSize: 14,
                       }}
                     >
-                      Total Requests :2
+                          Avarage Response Time : { item.averageResponseTime} ms
                     </Typography>
 
                     <Typography
@@ -392,20 +433,7 @@ const Dashboard = ({ setSelectedPage }) => {
                         fontSize: 14,
                       }}
                     >
-                      Avarage Response Time :2.1ms
-                    </Typography>
-
-                    <Typography
-                      gutterBottom
-                      style={{
-                        color: theme.palette.text.primary,
-                        fontFamily: Fonts.roboto_mono,
-                        marginBottom: 10,
-                        marginTop: 0,
-                        fontSize: 14,
-                      }}
-                    >
-                      Errors :7
+                      Errors : {item?.errorCount}
                     </Typography>
                   </span>
                 } // Change description color
