@@ -251,20 +251,7 @@ const ApiTesting = ({ setSelectedPage, data }) => {
       requestType: contentType == "application/json" ? "JSON" : "FORMDATA",
     };
 
-    /*   console.log(requestData)
-   GetRequest(
-      ApiUrls.getApi+"33",
-      requestData,
-      setProgress,
-      token,
-      setSuccess,
-      setError,
-      (res) => {
-        
-      },
-      null
-    ); */
-
+  
     PostRequestJson(
       ApiUrls.createApi,
       requestData,

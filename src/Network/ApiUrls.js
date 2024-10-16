@@ -18,4 +18,6 @@ export const ApiUrls = {
   addApiUsesAnalitics: BaseUrl + "api-usage-analytics",
   getApiUsesAnalitics: BaseUrl + "api-usage-analytics/",
   getStatistics: BaseUrl + "apis/statistics",
+  deleteProject: BaseUrl + "projects/",
+
 };

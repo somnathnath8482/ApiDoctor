@@ -63,9 +63,7 @@ const Register: React.FC = () => {
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-    // Add your form submission logic here
-    console.log(formData);
-
+ 
     const obj = {
       ...formData,
       passwordHash: formData.password,

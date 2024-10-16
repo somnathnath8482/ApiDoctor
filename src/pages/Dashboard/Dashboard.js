@@ -23,7 +23,7 @@ import { PieChart } from "@mui/x-charts/PieChart";
 import BasicPie from "../../components/BasicPie";
 import AddProjectDialog from "./AddProjectDialog";
 import { UserContext } from "../../context/MyContext";
-import { GetRequest } from "../../Network/ApiRequests";
+import { DeleteRequestJson, GetRequest } from "../../Network/ApiRequests";
 import { ApiUrls } from "../../Network/ApiUrls";
 import { FormateDate } from "../../utill/Helper";
 const Dashboard = ({ setSelectedPage }) => {
@@ -31,30 +31,22 @@ const Dashboard = ({ setSelectedPage }) => {
   const { token } = useContext(UserContext);
 
   const [projects, setProjects] = useState([]);
- const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false);
 
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [progress, setProgress] = useState(false);
 
-  const [apiStaistics,setApiStatistics] = useState([]);
+  const [apiStaistics, setApiStatistics] = useState([]);
 
-  const [noOfApis,setNoOfApis] = useState([]);
-  const [noOfRequest,setNoOfRequest] = useState([]);
-
-
-
+  const [noOfApis, setNoOfApis] = useState([]);
+  const [noOfRequest, setNoOfRequest] = useState([]);
 
   const handleViewApis = (access) => {
     setSelectedPage("api-management", access);
     // Navigate to API management page
   };
 
-  const handleDelete = (projectId) => {
-    console.log(`Adding API for project ${projectId}`);
-
-    // Navigate to add API form
-  };
 
   const handleClose = () => {
     setOpen(false);
@@ -74,7 +66,7 @@ const Dashboard = ({ setSelectedPage }) => {
       null
     );
   };
-  
+
   const getStatistics = () => {
     GetRequest(
       ApiUrls.getStatistics,
@@ -84,32 +76,39 @@ const Dashboard = ({ setSelectedPage }) => {
       null,
       setError,
       (res) => {
-        setApiStatistics(res?.data?.apis)
+        if(res?.data?.apis?.length>0){
+          setApiStatistics(res?.data?.apis);
 
-
-        let proj =res?.data?.projects;
+        let proj = res?.data?.projects;
         let req = [];
         let apis = [];
 
-        proj.map((item)=>{
+        proj?.map((item) => {
+          req.push({ id: item.id, value: item.requestCount, label: item.name });
+          apis.push({ id: item.id, value: item.apiCount, label: item.name });
+        });
 
-          req.push(
-            { id: item.id, value: item.requestCount, label: item.name },
-          )  
-          apis.push(
-            { id: item.id, value: item.apiCount, label: item.name },
-          )
-
-        })
-
-        console.log(apis)
-        console.log(req)
+      
 
         setNoOfApis(apis);
         setNoOfRequest(req);
+        }
+      },
+      null
+    );
+  };
 
-
-
+  const deleteProject = (id) => {
+    DeleteRequestJson(
+      ApiUrls.deleteProject + id,
+      {},
+      setProgress,
+      token,
+      setSuccess,
+      setError,
+      (res) => {
+        getAllProject();
+        getStatistics();
       },
       null
     );
@@ -187,7 +186,9 @@ const Dashboard = ({ setSelectedPage }) => {
                 color: theme.palette.common.white,
                 width: 25,
               }}
-              onClick={handleDelete}
+              onClick={()=>{
+                deleteProject(access?.project?.id)
+              }}
             />
           </Tooltip>
         </div>
@@ -330,7 +331,7 @@ const Dashboard = ({ setSelectedPage }) => {
             >
               Number of Apis:
             </Typography>
-            <BasicPie data ={noOfApis} />
+            <BasicPie data={noOfApis} />
           </div>
           <div style={{ flex: 1 }}>
             <Typography
@@ -346,7 +347,7 @@ const Dashboard = ({ setSelectedPage }) => {
             >
               Number of Requests:
             </Typography>
-            <BasicPie data = {noOfRequest} />
+            <BasicPie data={noOfRequest} />
           </div>
         </div>
       </Card>
@@ -395,8 +396,6 @@ const Dashboard = ({ setSelectedPage }) => {
                       gap: 10,
                     }}
                   >
-                   
-
                     <Typography
                       gutterBottom
                       style={{
@@ -420,7 +419,7 @@ const Dashboard = ({ setSelectedPage }) => {
                         fontSize: 14,
                       }}
                     >
-                          Avarage Response Time : { item.averageResponseTime} ms
+                      Avarage Response Time : {item.averageResponseTime} ms
                     </Typography>
 
                     <Typography

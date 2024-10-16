@@ -69,7 +69,7 @@ const InviteUserDialoug = ({ open, onClose, token , refresh,projectId}) => {
       
     };
 
-    console.log(obj);
+ 
     PostRequestJson(
       ApiUrls.addProjectsAccess,
       obj,
