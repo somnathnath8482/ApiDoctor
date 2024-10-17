@@ -26,6 +26,7 @@ import { UserContext } from "../../context/MyContext";
 import { DeleteRequestJson, GetRequest } from "../../Network/ApiRequests";
 import { ApiUrls } from "../../Network/ApiUrls";
 import { FormateDate } from "../../utill/Helper";
+import Conformation from "../../common/Conformation";
 const Dashboard = ({ setSelectedPage }) => {
   const theme = useTheme();
   const { token } = useContext(UserContext);
@@ -46,7 +47,6 @@ const Dashboard = ({ setSelectedPage }) => {
     setSelectedPage("api-management", access);
     // Navigate to API management page
   };
-
 
   const handleClose = () => {
     setOpen(false);
@@ -76,22 +76,24 @@ const Dashboard = ({ setSelectedPage }) => {
       null,
       setError,
       (res) => {
-        if(res?.data?.apis?.length>0){
+        if (res?.data?.apis?.length > 0) {
           setApiStatistics(res?.data?.apis);
 
-        let proj = res?.data?.projects;
-        let req = [];
-        let apis = [];
+          let proj = res?.data?.projects;
+          let req = [];
+          let apis = [];
 
-        proj?.map((item) => {
-          req.push({ id: item.id, value: item.requestCount, label: item.name });
-          apis.push({ id: item.id, value: item.apiCount, label: item.name });
-        });
+          proj?.map((item) => {
+            req.push({
+              id: item.id,
+              value: item.requestCount,
+              label: item.name,
+            });
+            apis.push({ id: item.id, value: item.apiCount, label: item.name });
+          });
 
-      
-
-        setNoOfApis(apis);
-        setNoOfRequest(req);
+          setNoOfApis(apis);
+          setNoOfRequest(req);
         }
       },
       null
@@ -118,6 +120,24 @@ const Dashboard = ({ setSelectedPage }) => {
     getAllProject();
     getStatistics();
   }, []);
+
+  const DeleteActionButton = useCallback(()=>{
+    return(
+      <Tooltip title="Delete Project" placement="left">
+            <DeleteIcon
+              style={{
+                backgroundColor: theme.palette.primary.main,
+                borderRadius: 5,
+                padding: 5,
+                alignSelf: "center",
+                color: theme.palette.common.white,
+                width: 25,
+              }}
+              
+            />
+          </Tooltip>
+    )
+  },[])
 
   const RenderItem = useCallback((access) => {
     return (
@@ -176,7 +196,20 @@ const Dashboard = ({ setSelectedPage }) => {
             />
           </Tooltip>
 
-          <Tooltip title="Delete Project" placement="left">
+          <Conformation
+            title={`Delete ${access.project.name} Project?`}
+            desc={
+              "If you delete project the Other related data to this project will be deleted.\n this cannot be Undone"
+            }
+            negativeText={"Cancle"}
+            posativeText={"Delete"}
+            ActionButton={<DeleteActionButton />}
+            posativeClick={()=>{
+              deleteProject(access?.project?.id) 
+            }}
+          />
+
+          {/* <Tooltip title="Delete Project" placement="left">
             <DeleteIcon
               style={{
                 backgroundColor: theme.palette.primary.main,
@@ -186,11 +219,13 @@ const Dashboard = ({ setSelectedPage }) => {
                 color: theme.palette.common.white,
                 width: 25,
               }}
-              onClick={()=>{
-                deleteProject(access?.project?.id)
+              onClick={() => {
+                
               }}
-            />
-          </Tooltip>
+              />
+            </Tooltip> */}
+
+
         </div>
       </Grid2>
     );

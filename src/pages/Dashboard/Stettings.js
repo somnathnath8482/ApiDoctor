@@ -62,7 +62,7 @@ const Settings = () => {
           fontSize: 30,
         }}
       >
-        Settings
+        Settings v4
       </Typography>
       <div
         style={{
