@@ -26,6 +26,8 @@ import {
 } from "@mui/material";
 import SaveIcon from "@mui/icons-material/Save";
 import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+
 import axios from "axios";
 import { useTheme } from "@emotion/react";
 import "../../css/ConsoleBlock.css";
@@ -39,6 +41,7 @@ import {
   PostRequestJson,
 } from "../../Network/ApiRequests";
 import { ApiUrls } from "../../Network/ApiUrls";
+import NoteEditor from "./Helper/NoteEditor";
 const ApiTesting = ({ setSelectedPage, data }) => {
   const { env, projectId, projectName, selectedApipt } = data;
 
@@ -73,8 +76,8 @@ const ApiTesting = ({ setSelectedPage, data }) => {
 
     if (selectedApi?.formdatas) {
       const modifiedFormData = selectedApi?.formdatas.map((frmdt) => {
-        const { formKey, formValue,formNote } = frmdt;
-        return { key: formKey, value: formValue , note:formNote};
+        const { formKey, formValue, formNote } = frmdt;
+        return { key: formKey, value: formValue, note: formNote };
       });
 
       setFormData(modifiedFormData);
@@ -85,7 +88,9 @@ const ApiTesting = ({ setSelectedPage, data }) => {
     selectedApi?.jsonString ? JSON.parse(selectedApi.jsonString) : ""
   );
 
-  const [jsonNote, SetJsonNote] = useState(selectedApi?.jsonNote? selectedApi.jsonNote : "");
+  const [jsonNote, SetJsonNote] = useState(
+    selectedApi?.jsonNote ? selectedApi.jsonNote : ""
+  );
 
   const [contentType, setContentType] = useState(
     selectedApi
@@ -145,8 +150,6 @@ const ApiTesting = ({ setSelectedPage, data }) => {
       return;
     }
 
-    console.log(formDataKey, formDataValue);
-    console.log("ddddd");
 
     setFormData([
       ...formData,
@@ -160,6 +163,18 @@ const ApiTesting = ({ setSelectedPage, data }) => {
   const handleRemoveFormData = (index) => {
     const updatedFormData = formData.filter((_, i) => i !== index);
     setFormData(updatedFormData);
+  };
+ 
+  const handleEditFormData = (index) => {
+    const selectedFormdata = formData.find((_, i) => i == index);
+    setFormDataKey(selectedFormdata.key);
+    setFormDataValue(selectedFormdata.value);
+    setFormDataNote(selectedFormdata.note);
+
+
+    const updatedFormData = formData.filter((_, i) => i !== index);
+    setFormData(updatedFormData);
+
   };
 
   const handleSendRequest = async () => {
@@ -623,7 +638,12 @@ const ApiTesting = ({ setSelectedPage, data }) => {
         </FormControl>
         {contentType === "application/json" ? (
           <div style={{ marginTop: 10 }}>
-            <TextField
+            <NoteEditor
+              note={jsonNote}
+              setNote={SetJsonNote}
+              placeholde="Addational note / message for JSON Body"
+            />
+            {/* <TextField
               label="Addational Note"
               id="outlined-size-small"
               multiline
@@ -631,7 +651,7 @@ const ApiTesting = ({ setSelectedPage, data }) => {
               fullWidth
               value={jsonNote}
               onChange={(e) => SetJsonNote(e.target.value)}
-            />
+            /> */}
             <TextField
               label="Request Body (JSON)"
               value={body}
@@ -645,7 +665,12 @@ const ApiTesting = ({ setSelectedPage, data }) => {
           </div>
         ) : (
           <Box style={{ marginTop: 20 }}>
-            <TextField
+            <NoteEditor
+              note={formDataNote}
+              setNote={setFormDataNote}
+              placeholde="Addational note / message for below Parameter"
+            />
+            {/* <TextField
               label="Addational Note"
               id="outlined-size-small"
               multiline
@@ -653,7 +678,7 @@ const ApiTesting = ({ setSelectedPage, data }) => {
               fullWidth
               value={formDataNote}
               onChange={(e) => setFormDataNote(e.target.value)}
-            />
+            /> */}
             <div
               style={{
                 flexDirection: "row",
@@ -768,6 +793,14 @@ const ApiTesting = ({ setSelectedPage, data }) => {
                       maxWidth: "100%", // Adjust the width for the text container
                     }}
                   />
+                  <IconButton
+                    onClick={() => {
+                      handleEditFormData(index);
+                    }}
+                  >
+                    <EditIcon />
+                  </IconButton>
+
                   <IconButton onClick={() => handleRemoveFormData(index)}>
                     <DeleteIcon />
                   </IconButton>
