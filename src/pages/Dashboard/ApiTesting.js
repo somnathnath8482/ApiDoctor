@@ -1,6 +1,6 @@
 // ApiTesting.js
 
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import {
   TextField,
   Button,
@@ -30,7 +30,7 @@ import axios from "axios";
 import { useTheme } from "@emotion/react";
 import "../../css/ConsoleBlock.css";
 import { Fonts } from "../../assets/fonts/Fonts";
-
+import EditNoteOutlinedIcon from "@mui/icons-material/EditNoteOutlined";
 import AddIcon from "@mui/icons-material/Add";
 import { UserContext } from "../../context/MyContext";
 import {
@@ -58,6 +58,9 @@ const ApiTesting = ({ setSelectedPage, data }) => {
   const [headers, setHeaders] = useState([]);
   const [formData, setFormData] = useState([]);
 
+  const [formKeyError, setFormKeyError] = useState(false);
+  const [formValueError, setFormValueError] = useState(false);
+
   useEffect(() => {
     if (selectedApi?.headers) {
       const modifiedheader = selectedApi?.headers.map((hdr) => {
@@ -70,8 +73,8 @@ const ApiTesting = ({ setSelectedPage, data }) => {
 
     if (selectedApi?.formdatas) {
       const modifiedFormData = selectedApi?.formdatas.map((frmdt) => {
-        const { formKey, formValue } = frmdt;
-        return { key: formKey, value: formValue };
+        const { formKey, formValue,formNote } = frmdt;
+        return { key: formKey, value: formValue , note:formNote};
       });
 
       setFormData(modifiedFormData);
@@ -81,6 +84,8 @@ const ApiTesting = ({ setSelectedPage, data }) => {
   const [body, setBody] = useState(
     selectedApi?.jsonString ? JSON.parse(selectedApi.jsonString) : ""
   );
+
+  const [jsonNote, SetJsonNote] = useState(selectedApi?.jsonNote? selectedApi.jsonNote : "");
 
   const [contentType, setContentType] = useState(
     selectedApi
@@ -99,6 +104,7 @@ const ApiTesting = ({ setSelectedPage, data }) => {
 
   const [formDataKey, setFormDataKey] = useState("");
   const [formDataValue, setFormDataValue] = useState("");
+  const [formDataNote, setFormDataNote] = useState("");
 
   const theme = useTheme();
 
@@ -131,9 +137,24 @@ const ApiTesting = ({ setSelectedPage, data }) => {
   };
 
   const handleAddFormData = () => {
-    setFormData([...formData, { key: formDataKey, value: formDataValue }]);
+    if (formDataKey === "") {
+      setFormKeyError(true);
+      return;
+    } else if (formDataValue === "") {
+      setFormValueError(true);
+      return;
+    }
+
+    console.log(formDataKey, formDataValue);
+    console.log("ddddd");
+
+    setFormData([
+      ...formData,
+      { key: formDataKey, value: formDataValue, note: formDataNote },
+    ]);
     setFormDataKey("");
     setFormDataValue("");
+    setFormDataNote("");
   };
 
   const handleRemoveFormData = (index) => {
@@ -157,9 +178,7 @@ const ApiTesting = ({ setSelectedPage, data }) => {
       };
 
       setReq(formatRequest(requestData));
-    } catch (e) {
-     
-    }
+    } catch (e) {}
 
     try {
       const headersObject = headers.reduce((acc, header) => {
@@ -167,11 +186,14 @@ const ApiTesting = ({ setSelectedPage, data }) => {
         return acc;
       }, {});
 
+      const frmdta = new FormData();
+
       const data =
         contentType === "application/json"
           ? JSON.parse(body)
           : formData.reduce((acc, field) => {
               if (field.key) acc[field.key] = field.value;
+              frmdta.append(field.key, field.value);
               return acc;
             }, {});
 
@@ -179,16 +201,13 @@ const ApiTesting = ({ setSelectedPage, data }) => {
         method,
         url,
         headers: headersObject,
-        data,
+        data: contentType === "application/json" ? data : frmdta,
       };
 
       const startTime = new Date().getTime();
 
-      try{
-
-      
-      await axios(config)
-        .then((res) => {
+      try {
+        await axios(config).then((res) => {
           const endTime = new Date().getTime();
           const responseTime = endTime - startTime;
           const statusCode = res.status;
@@ -198,16 +217,14 @@ const ApiTesting = ({ setSelectedPage, data }) => {
 
           handleAddAnalitics(responseTime, "N", projectId, selectedApi?.id);
         });
-      }catch (err) {
+      } catch (err) {
         //this is only for newtwork error except 200 code
         setErrors(err.message);
         setResponse("");
         const endTime = new Date().getTime();
         const responseTime = endTime - startTime;
         handleAddAnalitics(responseTime, "Y", projectId, selectedApi?.id);
-       
       }
-
     } catch (err) {
       setErrors(err.message);
       setResponse("");
@@ -229,8 +246,8 @@ const ApiTesting = ({ setSelectedPage, data }) => {
     });
 
     const modifiedFormData = formData.map((frmdt) => {
-      const { key, value } = frmdt;
-      return { formKey: key, formValue: value };
+      const { key, value, note } = frmdt;
+      return { formKey: key, formValue: value, formNote: note };
     });
 
     const requestData = {
@@ -248,10 +265,10 @@ const ApiTesting = ({ setSelectedPage, data }) => {
       headers: modifiedheader,
       formdatas: modifiedFormData,
       jsonString: JSON.stringify(body),
+      jsonNote: jsonNote,
       requestType: contentType == "application/json" ? "JSON" : "FORMDATA",
     };
-
-  
+    console.log(requestData);
     PostRequestJson(
       ApiUrls.createApi,
       requestData,
@@ -605,29 +622,38 @@ const ApiTesting = ({ setSelectedPage, data }) => {
           </Select>
         </FormControl>
         {contentType === "application/json" ? (
-          <TextField
-            label="Request Body (JSON)"
-            value={body}
-            onChange={(e) => setBody(e.target.value)}
-            fullWidth
-            multiline
-            rows={6}
-            margin="normal"
-            variant="outlined"
-          />
+          <div style={{ marginTop: 10 }}>
+            <TextField
+              label="Addational Note"
+              id="outlined-size-small"
+              multiline
+              placeholder="Addational note / message for Json Body"
+              fullWidth
+              value={jsonNote}
+              onChange={(e) => SetJsonNote(e.target.value)}
+            />
+            <TextField
+              label="Request Body (JSON)"
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+              fullWidth
+              multiline
+              rows={6}
+              margin="normal"
+              variant="outlined"
+            />
+          </div>
         ) : (
           <Box style={{ marginTop: 20 }}>
-            <Typography
-              style={{
-                color: theme.palette.text.primary,
-                fontFamily: Fonts.roboto_mono,
-                marginBottom: 0,
-                fontSize: 20,
-              }}
-            >
-              FormData Parameters
-            </Typography>
-
+            <TextField
+              label="Addational Note"
+              id="outlined-size-small"
+              multiline
+              placeholder="Addational note / message for below Parameter"
+              fullWidth
+              value={formDataNote}
+              onChange={(e) => setFormDataNote(e.target.value)}
+            />
             <div
               style={{
                 flexDirection: "row",
@@ -637,17 +663,25 @@ const ApiTesting = ({ setSelectedPage, data }) => {
               }}
             >
               <TextField
+                error={formKeyError}
                 label="Key"
                 value={formDataKey}
-                onChange={(e) => setFormDataKey(e.target.value)}
+                onChange={(e) => {
+                  setFormKeyError(false);
+                  setFormDataKey(e.target.value);
+                }}
                 fullWidth
                 variant="outlined"
                 sx={{ marginRight: 1, flex: 0.2 }}
               />
               <TextField
+                error={formValueError}
                 label="Value"
                 value={formDataValue}
-                onChange={(e) => setFormDataValue(e.target.value)}
+                onChange={(e) => {
+                  setFormValueError(false);
+                  setFormDataValue(e.target.value);
+                }}
                 fullWidth
                 variant="outlined"
                 sx={{ marginRight: 1, flex: 1 }}
@@ -680,7 +714,50 @@ const ApiTesting = ({ setSelectedPage, data }) => {
                   }}
                 >
                   <ListItemText
-                    primary={`${field.key} : ${field.value}`}
+                    secondary={
+                      <span
+                        style={{
+                          color: theme.palette.text.secondary,
+                          display: "flex",
+                          flexDirection: "row",
+                          gap: 30,
+                        }}
+                      >
+                        <Typography
+                          gutterBottom
+                          style={{
+                            color: theme.palette.text.primary,
+                            fontFamily: Fonts.roboto_mono,
+                            marginBottom: 10,
+                            marginTop: 0,
+                            fontSize: 16,
+                          }}
+                        >
+                          {`${field.key} : ${field.value}`}
+                        </Typography>
+                        <span
+                          style={{
+                            alignItems: "center",
+                            display: "flex",
+                            flexDirection: "row",
+                          }}
+                        >
+                          <EditNoteOutlinedIcon />
+                          <Typography
+                            gutterBottom
+                            style={{
+                              color: theme.palette.text.primary,
+                              fontFamily: Fonts.roboto_mono,
+                              marginBottom: 10,
+                              marginTop: 0,
+                              fontSize: 11,
+                            }}
+                          >
+                            {field.note}
+                          </Typography>
+                        </span>
+                      </span>
+                    }
                     style={{
                       display: "flex",
                       fontSize: "0.9rem", // Correct font size
@@ -700,7 +777,7 @@ const ApiTesting = ({ setSelectedPage, data }) => {
           </Box>
         )}
       </Paper>
-      <div style={{ flexDirection: "row", alignItems: "center" }}>
+      <div style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
         <Button
           onClick={handleSendRequest}
           variant="contained"
