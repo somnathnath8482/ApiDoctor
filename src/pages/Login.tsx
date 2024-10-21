@@ -33,7 +33,8 @@ const StyledContainer = styled(Container)(({ theme }) => ({
 const Login: React.FC = () => {
   const { isDarkMode } = useCustomTheme();
   const theme = useTheme();
-  const {token, setToken} = useContext(UserContext); 
+
+  const {token, setToken,setmUser} = useContext(UserContext); 
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     username: "",
@@ -80,10 +81,14 @@ const Login: React.FC = () => {
           setError(res.data.message);
           setSuccess(null);
         }else{
+          console.log(res.data.user)
 
           setToken(res.data.token);
+          setmUser(res.data.user);
           storeJsonData("user",res.data.user);
           storeData("token",res.data.token);
+
+
            navigate('/home');
         }
       },

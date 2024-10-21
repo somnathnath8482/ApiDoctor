@@ -33,6 +33,7 @@ import { UserContext } from "../../context/MyContext";
 import { FormateDate } from "../../utill/Helper";
 import BlockIcon from "@mui/icons-material/Block";
 import InviteUserDialoug from "./InviteUserDialoug";
+import Conformation from "../../common/Conformation";
 
 const APIManagement = ({ setSelectedPage, data }) => {
   const [expanded, setExpanded] = useState(null);
@@ -41,7 +42,8 @@ const APIManagement = ({ setSelectedPage, data }) => {
   const [selectedEnv, setSelectedEnv] = useState(
     data?.project?.environments[0].id
   );
-  const { token } = useContext(UserContext);
+
+  const { token, mUser } = useContext(UserContext);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [progress, setProgress] = useState(false);
@@ -56,6 +58,21 @@ const APIManagement = ({ setSelectedPage, data }) => {
   const handleClose = () => {
     setOpen(false);
   };
+  const DeleteActionButton = useCallback(() => {
+    return (
+      <Tooltip title="Delete Project" placement="left">
+        <DeleteOutlineIcon
+          style={{
+            backgroundColor: theme.palette.primary.main,
+            borderRadius: 5,
+            padding: 5,
+            color: theme.palette.common.white,
+            width: 20,
+          }}
+        />
+      </Tooltip>
+    );
+  }, []);
 
   const navigateToApi = (api) => {
     let obj = {
@@ -145,6 +162,23 @@ const APIManagement = ({ setSelectedPage, data }) => {
     setSelectedEnv(e.target.value);
   };
 
+  const hasAccess = useCallback((projectAcess) => {
+
+
+    console.log(projectAcess?.project?.user?.id, mUser?.id)
+
+    if (projectAcess?.project?.user?.id == mUser?.id) {
+      //im the owner
+      if (projectAcess?.user?.id == mUser?.id) {
+        return false;
+      } else {
+        return true;
+      }
+    } else{
+      return false;
+    }
+  }, []);
+
   const RenderItem = useCallback(
     (user) => (
       <Grid2
@@ -191,7 +225,7 @@ const APIManagement = ({ setSelectedPage, data }) => {
             Assigned On: {FormateDate(user?.grantedAt)}
           </Typography>
         </div>
-        {user?.accessLevel != "OWNER" && (
+        {hasAccess(user)&& (
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <Tooltip title="Edit Access" placement="left">
               <EditIcon
@@ -615,18 +649,16 @@ const APIManagement = ({ setSelectedPage, data }) => {
                 </Tooltip>
 
                 <Tooltip title="Delete API" placement="left">
-                  <DeleteOutlineIcon
-                    style={{
-                      backgroundColor: theme.palette.primary.main,
-                      borderRadius: 5,
-                      padding: 5,
-                      color: theme.palette.common.white,
-                      width: 20,
-                    }}
-                    onClick={() => {
+                  <Conformation
+                    title={`Delete ${api.name} Api?`}
+                    desc={"Are you sure? Want to delete the api?"}
+                    negativeText={"Cancle"}
+                    posativeText={"Delete"}
+                    ActionButton={<DeleteActionButton />}
+                    posativeClick={() => {
                       handleDeleteApi(api.id);
                     }}
-                  />
+                  />{" "}
                 </Tooltip>
               </div>
             </Card>

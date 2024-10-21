@@ -18,6 +18,7 @@ import Notifications from "./pages/Dashboard/Notifications"; // Create this page
 import EditProfile from "./pages/EditProfile"; // Create this page
 import AfterLoginHome from "./pages/AfterLoginHome";
 import { MyContext } from "./context/MyContext";
+import ProfilePage from "./pages/ProfilePage";
 
 const App = () => {
   return (
@@ -31,6 +32,7 @@ const App = () => {
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/otp" element={<OtpPage />} />
             <Route path="/set-password" element={<SetPassword />} />
+            <Route path="/profile" element={<ProfilePage />} />
             {/* <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/api-management" element={<ApiManagement />} />
           <Route path="/api-testing" element={<ApiTesting />} />
