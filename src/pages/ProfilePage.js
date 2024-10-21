@@ -31,7 +31,7 @@ const ProfilePage = () => {
         <Card sx={{ height: "100%" }}>
           <CardContent>
             <Avatar
-              src="/path-to-profile-pic"
+              src="https://i.pravatar.cc/300" 
               style={{ width: 80, height: 80 }}
             />
             <Typography variant="h5">John Doe</Typography>

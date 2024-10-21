@@ -81,15 +81,13 @@ const Login: React.FC = () => {
           setError(res.data.message);
           setSuccess(null);
         }else{
-          console.log(res.data.user)
-
           setToken(res.data.token);
           setmUser(res.data.user);
           storeJsonData("user",res.data.user);
           storeData("token",res.data.token);
 
 
-           navigate('/home');
+           navigate('/home',{replace:true});
         }
       },
       null

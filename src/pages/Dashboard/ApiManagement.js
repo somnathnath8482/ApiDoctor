@@ -73,6 +73,21 @@ const APIManagement = ({ setSelectedPage, data }) => {
       </Tooltip>
     );
   }, []);
+  const DeleteActionButton1 = useCallback(() => {
+    return (
+      <DeleteIcon
+        style={{
+          backgroundColor: theme.palette.primary.main,
+          borderRadius: 5,
+          padding: 5,
+          alignSelf: "center",
+          color: theme.palette.common.white,
+          width: 25,
+        }}
+        onClick={() => {}}
+      />
+    );
+  }, []);
 
   const navigateToApi = (api) => {
     let obj = {
@@ -163,10 +178,6 @@ const APIManagement = ({ setSelectedPage, data }) => {
   };
 
   const hasAccess = useCallback((projectAcess) => {
-
-
-    console.log(projectAcess?.project?.user?.id, mUser?.id)
-
     if (projectAcess?.project?.user?.id == mUser?.id) {
       //im the owner
       if (projectAcess?.user?.id == mUser?.id) {
@@ -174,7 +185,7 @@ const APIManagement = ({ setSelectedPage, data }) => {
       } else {
         return true;
       }
-    } else{
+    } else {
       return false;
     }
   }, []);
@@ -225,7 +236,7 @@ const APIManagement = ({ setSelectedPage, data }) => {
             Assigned On: {FormateDate(user?.grantedAt)}
           </Typography>
         </div>
-        {hasAccess(user)&& (
+        {hasAccess(user) && (
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <Tooltip title="Edit Access" placement="left">
               <EditIcon
@@ -240,16 +251,13 @@ const APIManagement = ({ setSelectedPage, data }) => {
             </Tooltip>
 
             <Tooltip title="Remove Access" placement="left">
-              <DeleteIcon
-                style={{
-                  backgroundColor: theme.palette.primary.main,
-                  borderRadius: 5,
-                  padding: 5,
-                  alignSelf: "center",
-                  color: theme.palette.common.white,
-                  width: 25,
-                }}
-                onClick={() => {
+              <Conformation
+                title={`Remove Access From ${user?.user?.name} ?`}
+                desc={"Are you sure? Want to Remove Access ?"}
+                negativeText={"Cancle"}
+                posativeText={"Delete"}
+                ActionButton={<DeleteActionButton1 />}
+                posativeClick={() => {
                   deleteAccess(user?.id);
                 }}
               />
@@ -658,7 +666,7 @@ const APIManagement = ({ setSelectedPage, data }) => {
                     posativeClick={() => {
                       handleDeleteApi(api.id);
                     }}
-                  />{" "}
+                  />
                 </Tooltip>
               </div>
             </Card>
