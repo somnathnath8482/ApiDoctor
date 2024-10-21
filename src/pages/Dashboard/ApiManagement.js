@@ -60,7 +60,7 @@ const APIManagement = ({ setSelectedPage, data }) => {
   };
   const DeleteActionButton = useCallback(() => {
     return (
-      <Tooltip title="Delete Project" placement="left">
+      <Tooltip title="Delete Api" placement="left">
         <DeleteOutlineIcon
           style={{
             backgroundColor: theme.palette.primary.main,
@@ -75,17 +75,19 @@ const APIManagement = ({ setSelectedPage, data }) => {
   }, []);
   const DeleteActionButton1 = useCallback(() => {
     return (
-      <DeleteIcon
-        style={{
-          backgroundColor: theme.palette.primary.main,
-          borderRadius: 5,
-          padding: 5,
-          alignSelf: "center",
-          color: theme.palette.common.white,
-          width: 25,
-        }}
-        onClick={() => {}}
-      />
+      <Tooltip title="Remove Access" placement="left">
+        <DeleteIcon
+          style={{
+            backgroundColor: theme.palette.primary.main,
+            borderRadius: 5,
+            padding: 5,
+            alignSelf: "center",
+            color: theme.palette.common.white,
+            width: 25,
+          }}
+          onClick={() => {}}
+        />
+      </Tooltip>
     );
   }, []);
 
@@ -94,6 +96,7 @@ const APIManagement = ({ setSelectedPage, data }) => {
       env: env.find((item) => item.id === selectedEnv),
       projectId: data?.project?.id,
       projectName: data?.project?.name,
+      hasAccess: hasAccess2(),
     };
 
     if (api != null && api != undefined) {
@@ -177,16 +180,59 @@ const APIManagement = ({ setSelectedPage, data }) => {
     setSelectedEnv(e.target.value);
   };
 
-  const hasAccess = useCallback((projectAcess) => {
-    if (projectAcess?.project?.user?.id == mUser?.id) {
-      //im the owner
-      if (projectAcess?.user?.id == mUser?.id) {
-        return false;
-      } else {
-        return true;
+  const hasAccess2 = useCallback(() => {
+    let myAccess = undefined;
+    for (let i = 0; i < users.length; i++) {
+      const item = users[i];
+      // Ensure `item` and `item.user` exist before accessing `item.user.id`
+      if (item.user.id === mUser?.id) {
+        myAccess = item;
+        break; // Exit the loop as soon as a match is found
       }
-    } else {
+    }
+    console.log("Maccess", myAccess);
+
+    return (
+      myAccess?.accessLevel == "OWNER" || myAccess?.accessLevel == "EDITOR"
+    );
+  }, [users]);
+
+  const hasAccess1 = useCallback(() => {
+    let myAccess = undefined;
+    for (let i = 0; i < users.length; i++) {
+      const item = users[i];
+      // Ensure `item` and `item.user` exist before accessing `item.user.id`
+      if (item.user.id === mUser?.id) {
+        myAccess = item;
+        break; // Exit the loop as soon as a match is found
+      }
+    }
+    console.log("Maccess", myAccess);
+
+    return myAccess?.accessLevel == "OWNER";
+  }, [users]);
+
+  const hasAccess = useCallback((projectAcess, uid, users) => {
+    let myAccess = undefined;
+    for (let i = 0; i < users.length; i++) {
+      const item = users[i];
+      // Ensure `item` and `item.user` exist before accessing `item.user.id`
+      if (item.user.id === uid) {
+        myAccess = item;
+        break; // Exit the loop as soon as a match is found
+      }
+    }
+
+    let hasDeletePower = myAccess?.accessLevel == "OWNER";
+
+    if (projectAcess?.project?.user?.id == projectAcess?.user?.id) {
       return false;
+    } else if (projectAcess?.project?.user?.id == mUser?.id) {
+      return true;
+    } else if (projectAcess?.user?.id == mUser?.id) {
+      return false;
+    } else {
+      return hasDeletePower;
     }
   }, []);
 
@@ -236,37 +282,23 @@ const APIManagement = ({ setSelectedPage, data }) => {
             Assigned On: {FormateDate(user?.grantedAt)}
           </Typography>
         </div>
-        {hasAccess(user) && (
+        {hasAccess(user, mUser.id, users) && (
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <Tooltip title="Edit Access" placement="left">
-              <EditIcon
-                style={{
-                  backgroundColor: theme.palette.primary.main,
-                  borderRadius: 5,
-                  padding: 5,
-                  color: theme.palette.common.white,
-                  width: 25,
-                }}
-              />
-            </Tooltip>
-
-            <Tooltip title="Remove Access" placement="left">
-              <Conformation
-                title={`Remove Access From ${user?.user?.name} ?`}
-                desc={"Are you sure? Want to Remove Access ?"}
-                negativeText={"Cancle"}
-                posativeText={"Delete"}
-                ActionButton={<DeleteActionButton1 />}
-                posativeClick={() => {
-                  deleteAccess(user?.id);
-                }}
-              />
-            </Tooltip>
+            <Conformation
+              title={`Remove Access From ${user?.user?.name} ?`}
+              desc={"Are you sure? Want to Remove Access ?"}
+              negativeText={"Cancle"}
+              posativeText={"Delete"}
+              ActionButton={<DeleteActionButton1 />}
+              posativeClick={() => {
+                deleteAccess(user?.id);
+              }}
+            />
           </div>
         )}
       </Grid2>
     ),
-    []
+    [users]
   );
 
   return (
@@ -401,16 +433,18 @@ const APIManagement = ({ setSelectedPage, data }) => {
             Project Users :
           </Typography>
 
-          <Button
-            onClick={() => {
-              setOpen(true);
-            }}
-            variant="contained"
-            color="primary"
-            sx={{ marginBottom: 1 }}
-          >
-            Invite New User
-          </Button>
+          {hasAccess1() && (
+            <Button
+              onClick={() => {
+                setOpen(true);
+              }}
+              variant="contained"
+              color="primary"
+              sx={{ marginBottom: 1 }}
+            >
+              Invite New User
+            </Button>
+          )}
         </div>
         <InviteUserDialoug
           onClose={handleClose}
@@ -449,16 +483,18 @@ const APIManagement = ({ setSelectedPage, data }) => {
           Project APIS :
         </Typography>
 
-        <Button
-          onClick={() => {
-            navigateToApi(null);
-          }}
-          variant="contained"
-          color="primary"
-          sx={{ marginBottom: 1 }}
-        >
-          Add Apis
-        </Button>
+        {hasAccess1() && (
+          <Button
+            onClick={() => {
+              navigateToApi(null);
+            }}
+            variant="contained"
+            color="primary"
+            sx={{ marginBottom: 1 }}
+          >
+            Add Apis
+          </Button>
+        )}
       </div>
 
       <Grid2 container spacing={1} style={{ padding: 10, marginTop: 2 }}>
@@ -656,7 +692,7 @@ const APIManagement = ({ setSelectedPage, data }) => {
                   />
                 </Tooltip>
 
-                <Tooltip title="Delete API" placement="left">
+                {hasAccess1() && (
                   <Conformation
                     title={`Delete ${api.name} Api?`}
                     desc={"Are you sure? Want to delete the api?"}
@@ -667,7 +703,7 @@ const APIManagement = ({ setSelectedPage, data }) => {
                       handleDeleteApi(api.id);
                     }}
                   />
-                </Tooltip>
+                )}
               </div>
             </Card>
           </Grid2>

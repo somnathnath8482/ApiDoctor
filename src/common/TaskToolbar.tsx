@@ -1,4 +1,4 @@
-import React, { useState, Dispatch, SetStateAction } from "react";
+import React, { useState, Dispatch, SetStateAction, useContext } from "react";
 import {
   AppBar,
   Toolbar,
@@ -17,6 +17,7 @@ import { Images } from "../assets/images/Images";
 import { MaterialUISwitch } from "./MaterialUISwitch";
 import { storeData, storeJsonData } from "../utill/Storage";
 import { useNavigate } from "react-router-dom";
+import { UserContext } from "../context/MyContext";
 
 // Styled components for toolbar
 const StyledToolbar = styled(Toolbar)({
@@ -36,7 +37,7 @@ const TaskToolbar: React.FC<{
   const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
-
+  const {mUser,setmUser} = useContext(UserContext); 
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
@@ -111,6 +112,12 @@ const TaskToolbar: React.FC<{
               },
             }}
           >
+            <MenuItem
+             disabled
+            >
+              {mUser?.name}
+            </MenuItem>
+            
             <MenuItem
               onClick={() => {
                 handleMenuClose();

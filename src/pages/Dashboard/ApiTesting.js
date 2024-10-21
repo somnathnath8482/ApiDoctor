@@ -43,7 +43,7 @@ import {
 import { ApiUrls } from "../../Network/ApiUrls";
 import NoteEditor from "./Helper/NoteEditor";
 const ApiTesting = ({ setSelectedPage, data }) => {
-  const { env, projectId, projectName, selectedApipt } = data;
+  const { env, projectId, projectName, selectedApipt, hasAccess } = data;
 
   const [selectedApi, setSelectedApi] = useState(selectedApipt);
 
@@ -150,7 +150,6 @@ const ApiTesting = ({ setSelectedPage, data }) => {
       return;
     }
 
-
     setFormData([
       ...formData,
       { key: formDataKey, value: formDataValue, note: formDataNote },
@@ -164,17 +163,15 @@ const ApiTesting = ({ setSelectedPage, data }) => {
     const updatedFormData = formData.filter((_, i) => i !== index);
     setFormData(updatedFormData);
   };
- 
+
   const handleEditFormData = (index) => {
     const selectedFormdata = formData.find((_, i) => i == index);
     setFormDataKey(selectedFormdata.key);
     setFormDataValue(selectedFormdata.value);
     setFormDataNote(selectedFormdata.note);
 
-
     const updatedFormData = formData.filter((_, i) => i !== index);
     setFormData(updatedFormData);
-
   };
 
   const handleSendRequest = async () => {
@@ -450,6 +447,7 @@ const ApiTesting = ({ setSelectedPage, data }) => {
           variant="outlined"
           required
           style={{ flex: 1, fontFamily: Fonts.roboto_mono }}
+          disabled={!hasAccess}
         />
 
         <TextField
@@ -460,6 +458,7 @@ const ApiTesting = ({ setSelectedPage, data }) => {
           variant="outlined"
           required
           style={{ flex: 1, fontFamily: Fonts.roboto_mono }}
+          disabled={!hasAccess}
         />
         <div
           style={{
@@ -483,6 +482,7 @@ const ApiTesting = ({ setSelectedPage, data }) => {
               label="Request Method"
               style={{ fontFamily: Fonts.roboto_mono }}
               onChange={(e) => setMethod(e.target.value)}
+              disabled={!hasAccess}
             >
               <MenuItem value="GET" style={{ fontFamily: Fonts.roboto_mono }}>
                 GET
@@ -512,6 +512,7 @@ const ApiTesting = ({ setSelectedPage, data }) => {
             variant="outlined"
             placeholder={env?.baseUrl + "/**"}
             style={{ flex: 0.895, fontFamily: Fonts.roboto_mono }}
+            disabled={!hasAccess}
           />
         </div>
       </Paper>
@@ -547,6 +548,7 @@ const ApiTesting = ({ setSelectedPage, data }) => {
             variant="outlined"
             sx={{ marginRight: 1 }}
             style={{ flex: 0.22 }}
+            disabled={!hasAccess}
           />
           <TextField
             label="Header Value"
@@ -556,6 +558,7 @@ const ApiTesting = ({ setSelectedPage, data }) => {
             variant="outlined"
             sx={{ marginRight: 1 }}
             style={{ flex: 1 }}
+            disabled={!hasAccess}
           />
           <Tooltip title="Add Header" placement="left" style={{ flex: 1 }}>
             <AddIcon
@@ -621,6 +624,7 @@ const ApiTesting = ({ setSelectedPage, data }) => {
             label="Request Method"
             style={{ fontFamily: Fonts.roboto_mono }}
             onChange={(e) => setContentType(e.target.value)}
+            disabled={!hasAccess}
           >
             <MenuItem
               value="application/json"
@@ -661,6 +665,7 @@ const ApiTesting = ({ setSelectedPage, data }) => {
               rows={6}
               margin="normal"
               variant="outlined"
+              disabled={!hasAccess}
             />
           </div>
         ) : (
@@ -698,6 +703,7 @@ const ApiTesting = ({ setSelectedPage, data }) => {
                 fullWidth
                 variant="outlined"
                 sx={{ marginRight: 1, flex: 0.2 }}
+                disabled={!hasAccess}
               />
               <TextField
                 error={formValueError}
@@ -710,6 +716,7 @@ const ApiTesting = ({ setSelectedPage, data }) => {
                 fullWidth
                 variant="outlined"
                 sx={{ marginRight: 1, flex: 1 }}
+                disabled={!hasAccess}
               />
               <Tooltip title="Add Param" placement="left" style={{ flex: 1 }}>
                 <AddIcon
@@ -760,27 +767,29 @@ const ApiTesting = ({ setSelectedPage, data }) => {
                         >
                           {`${field.key} : ${field.value}`}
                         </Typography>
-                        <span
-                          style={{
-                            alignItems: "center",
-                            display: "flex",
-                            flexDirection: "row",
-                          }}
-                        >
-                          <EditNoteOutlinedIcon />
-                          <Typography
-                            gutterBottom
+                        {field.note && (
+                          <span
                             style={{
-                              color: theme.palette.text.primary,
-                              fontFamily: Fonts.roboto_mono,
-                              marginBottom: 10,
-                              marginTop: 0,
-                              fontSize: 11,
+                              alignItems: "center",
+                              display: "flex",
+                              flexDirection: "row",
                             }}
                           >
-                            {field.note}
-                          </Typography>
-                        </span>
+                            <EditNoteOutlinedIcon />
+                            <Typography
+                              gutterBottom
+                              style={{
+                                color: theme.palette.text.primary,
+                                fontFamily: Fonts.roboto_mono,
+                                marginBottom: 10,
+                                marginTop: 0,
+                                fontSize: 11,
+                              }}
+                            >
+                              {field.note}
+                            </Typography>
+                          </span>
+                        )}
                       </span>
                     }
                     style={{
@@ -820,14 +829,16 @@ const ApiTesting = ({ setSelectedPage, data }) => {
           Send Request
         </Button>
 
-        <Button
-          onClick={handleAddApi}
-          variant="contained"
-          color="primary"
-          sx={{ marginBottom: 2, marginStart: 10 }}
-        >
-          {selectedApi ? "Update Api" : "Add Api"}
-        </Button>
+        {hasAccess && (
+          <Button
+            onClick={handleAddApi}
+            variant="contained"
+            color="primary"
+            sx={{ marginBottom: 2, marginStart: 10 }}
+          >
+            {selectedApi ? "Update Api" : "Add Api"}
+          </Button>
+        )}
       </div>
 
       {!!error && (

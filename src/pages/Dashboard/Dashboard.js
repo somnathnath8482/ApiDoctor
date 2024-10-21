@@ -13,7 +13,11 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { List, Avatar } from "antd";
-import { PieChartOutlined, PlusOutlined } from "@ant-design/icons";
+import {
+  EllipsisOutlined,
+  PieChartOutlined,
+  PlusOutlined,
+} from "@ant-design/icons";
 import { useTheme } from "@emotion/react";
 import { Fonts } from "../../assets/fonts/Fonts";
 import RemoveRedEyeOutlinedIcon from "@mui/icons-material/RemoveRedEyeOutlined";
@@ -29,7 +33,7 @@ import { FormateDate } from "../../utill/Helper";
 import Conformation from "../../common/Conformation";
 const Dashboard = ({ setSelectedPage }) => {
   const theme = useTheme();
-  const { token } = useContext(UserContext);
+  const { token, mUser } = useContext(UserContext);
 
   const [projects, setProjects] = useState([]);
   const [open, setOpen] = useState(false);
@@ -121,23 +125,34 @@ const Dashboard = ({ setSelectedPage }) => {
     getStatistics();
   }, []);
 
-  const DeleteActionButton = useCallback(()=>{
-    return(
+  const DeleteActionButton = useCallback(() => {
+    return (
       <Tooltip title="Delete Project" placement="left">
-            <DeleteIcon
-              style={{
-                backgroundColor: theme.palette.primary.main,
-                borderRadius: 5,
-                padding: 5,
-                alignSelf: "center",
-                color: theme.palette.common.white,
-                width: 25,
-              }}
-              
-            />
-          </Tooltip>
-    )
-  },[])
+        <DeleteIcon
+          style={{
+            backgroundColor: theme.palette.primary.main,
+            borderRadius: 5,
+            padding: 5,
+            alignSelf: "center",
+            color: theme.palette.common.white,
+            width: 25,
+          }}
+        />
+      </Tooltip>
+    );
+  }, []);
+
+  const hasAccess = useCallback((projectAcess) => {
+   console.log(projectAcess)
+
+    if (projectAcess?.project?.user?.id == mUser?.id) {
+      return true;
+    } else if (projectAcess.accessLevel== "OWNER") {
+      return true;
+    } else {
+      return false;
+    }
+  }, []);
 
   const RenderItem = useCallback((access) => {
     return (
@@ -196,36 +211,20 @@ const Dashboard = ({ setSelectedPage }) => {
             />
           </Tooltip>
 
-          <Conformation
-            title={`Delete ${access.project.name} Project?`}
-            desc={
-              "If you delete project the Other related data to this project will be deleted.\n this cannot be Undone"
-            }
-            negativeText={"Cancle"}
-            posativeText={"Delete"}
-            ActionButton={<DeleteActionButton />}
-            posativeClick={()=>{
-              deleteProject(access?.project?.id) 
-            }}
-          />
-
-          {/* <Tooltip title="Delete Project" placement="left">
-            <DeleteIcon
-              style={{
-                backgroundColor: theme.palette.primary.main,
-                borderRadius: 5,
-                padding: 5,
-                alignSelf: "center",
-                color: theme.palette.common.white,
-                width: 25,
+          {hasAccess(access) && (
+            <Conformation
+              title={`Delete ${access.project.name} Project?`}
+              desc={
+                "If you delete project the Other related data to this project will be deleted.\n this cannot be Undone"
+              }
+              negativeText={"Cancle"}
+              posativeText={"Delete"}
+              ActionButton={<DeleteActionButton />}
+              posativeClick={() => {
+                deleteProject(access?.project?.id);
               }}
-              onClick={() => {
-                
-              }}
-              />
-            </Tooltip> */}
-
-
+            />
+          )}
         </div>
       </Grid2>
     );
