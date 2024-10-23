@@ -113,7 +113,7 @@ const ApiTesting = ({ setSelectedPage, data }) => {
 
   const theme = useTheme();
 
-  const { token } = useContext(UserContext);
+  const { token, mUser } = useContext(UserContext);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [progress, setProgress] = useState(false);
@@ -322,6 +322,46 @@ const ApiTesting = ({ setSelectedPage, data }) => {
     a.href = url;
     a.download = "response.txt";
     a.click();
+  };
+
+  const reportError = () => {
+    const stackTrace = {
+      req: req,
+      res: response,
+    };
+
+    
+    const errr = {
+      severity: "Critical",
+      apiName: selectedApi?.name,
+      apiEndpoint: url,
+      stacktrace: JSON.stringify(stackTrace),
+      envName:  env?.name,
+      description:
+        "The API is returning null for user details in production environment.",
+      reporterId: mUser?.id,
+      envId: env?.id,
+      title: "New bug reported",
+      projectId: projectId,
+      apiId:  selectedApi?.id,
+      status: "Open",
+      uId:mUser?.id,
+    };
+
+    console.log(errr);
+
+    PostRequestJson(
+      ApiUrls.addBug,
+      errr,
+      null,
+      token,
+      null,
+      null,
+      (res) => {
+
+      },
+      null
+    );
   };
 
   const formatRequest = ({ method, url, headers, type, body }) => {
@@ -862,9 +902,26 @@ const ApiTesting = ({ setSelectedPage, data }) => {
 
       {req && (
         <Paper elevation={3} sx={{ padding: 2, borderRadius: 3 }}>
-          <Typography variant="h6" gutterBottom>
-            Request
-          </Typography>
+          <dev
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "space-between",
+            }}
+          >
+            <Typography variant="h6" gutterBottom>
+              Request
+            </Typography>
+            <Button
+              onClick={reportError}
+              variant="contained"
+              color="warning"
+              startIcon={<SaveIcon />}
+              sx={{ marginBottom: 2, marginRight: 5 }}
+            >
+              Report Error
+            </Button>
+          </dev>
 
           <div className="console-container">
             <pre
