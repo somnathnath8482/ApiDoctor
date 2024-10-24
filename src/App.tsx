@@ -19,6 +19,8 @@ import EditProfile from "./pages/EditProfile"; // Create this page
 import AfterLoginHome from "./pages/AfterLoginHome";
 import { MyContext } from "./context/MyContext";
 import ProfilePage from "./pages/ProfilePage";
+import BugPage from "./pages/BugReport/BugPage";
+import BugDetails from "./pages/BugReport/BugDetails";
 
 const App = () => {
   return (
@@ -39,6 +41,8 @@ const App = () => {
           <Route path="/notifications" element={<Notifications />} />
  */}
             <Route path="/home" element={<AfterLoginHome />} />
+            <Route path="/bugs" element={<BugPage />} />
+            <Route path="/bug-info" element={<BugDetails />} />
             {/* <Route path="/testApi" element={<ApiTesting />} /> */}
 
             <Route path="/logout" element={<div>Logout</div>} />

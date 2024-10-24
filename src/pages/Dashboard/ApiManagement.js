@@ -34,7 +34,7 @@ import { FormateDate } from "../../utill/Helper";
 import BlockIcon from "@mui/icons-material/Block";
 import InviteUserDialoug from "./InviteUserDialoug";
 import Conformation from "../../common/Conformation";
-
+import BugReportIcon from '@mui/icons-material/BugReport';
 const APIManagement = ({ setSelectedPage, data }) => {
   const [expanded, setExpanded] = useState(null);
   const [env, setEnv] = useState(data?.project?.environments);
@@ -50,6 +50,7 @@ const APIManagement = ({ setSelectedPage, data }) => {
   const [open, setOpen] = useState(false);
   const [apiList, setApiList] = useState([]);
 
+  const navigate = useNavigate();
   const theme = useTheme();
   const handleToggleExpand = (index) => {
     setExpanded(expanded === index ? null : index);
@@ -190,7 +191,7 @@ const APIManagement = ({ setSelectedPage, data }) => {
         break; // Exit the loop as soon as a match is found
       }
     }
-    console.log("Maccess", myAccess);
+
 
     return (
       myAccess?.accessLevel == "OWNER" || myAccess?.accessLevel == "EDITOR"
@@ -207,7 +208,7 @@ const APIManagement = ({ setSelectedPage, data }) => {
         break; // Exit the loop as soon as a match is found
       }
     }
-    console.log("Maccess", myAccess);
+  
 
     return myAccess?.accessLevel == "OWNER";
   }, [users]);
@@ -389,6 +390,9 @@ const APIManagement = ({ setSelectedPage, data }) => {
             })}
           </Select>
         </FormControl>
+
+
+        <BugReportIcon onClick={()=>{navigate("/bugs")}}/>
       </div>
 
       {!!error && (

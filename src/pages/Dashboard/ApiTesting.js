@@ -1,6 +1,6 @@
 // ApiTesting.js
 
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
 import {
   TextField,
   Button,
@@ -42,6 +42,7 @@ import {
 } from "../../Network/ApiRequests";
 import { ApiUrls } from "../../Network/ApiUrls";
 import NoteEditor from "./Helper/NoteEditor";
+import FormDialog from "../../common/FormDialoug";
 const ApiTesting = ({ setSelectedPage, data }) => {
   const { env, projectId, projectName, selectedApipt, hasAccess } = data;
 
@@ -324,28 +325,26 @@ const ApiTesting = ({ setSelectedPage, data }) => {
     a.click();
   };
 
-  const reportError = () => {
+  const reportError = (msg) => {
     const stackTrace = {
       req: req,
       res: response,
     };
 
-    
     const errr = {
       severity: "Critical",
       apiName: selectedApi?.name,
       apiEndpoint: url,
       stacktrace: JSON.stringify(stackTrace),
-      envName:  env?.name,
-      description:
-        "The API is returning null for user details in production environment.",
+      envName: env?.name,
+      description:msg,
       reporterId: mUser?.id,
       envId: env?.id,
-      title: "New bug reported",
+      title: "New bug reported By "+ mUser?.name,
       projectId: projectId,
-      apiId:  selectedApi?.id,
+      apiId: selectedApi?.id,
       status: "Open",
-      uId:mUser?.id,
+      uId: mUser?.id,
     };
 
     console.log(errr);
@@ -357,9 +356,7 @@ const ApiTesting = ({ setSelectedPage, data }) => {
       token,
       null,
       null,
-      (res) => {
-
-      },
+      (res) => {},
       null
     );
   };
@@ -387,6 +384,21 @@ const ApiTesting = ({ setSelectedPage, data }) => {
 
     return formattedRequest;
   };
+
+
+  const ReportActionButton = useCallback(() => {
+    return (
+      <Button
+             
+              variant="contained"
+              color="warning"
+              startIcon={<SaveIcon />}
+              sx={{ marginBottom: 2, marginRight: 5 }}
+            >
+              Report Error
+            </Button>
+    );
+  }, []);
 
   return (
     <Box
@@ -912,15 +924,13 @@ const ApiTesting = ({ setSelectedPage, data }) => {
             <Typography variant="h6" gutterBottom>
               Request
             </Typography>
-            <Button
+
+            <FormDialog
+              ActionButton={<ReportActionButton /> }
               onClick={reportError}
-              variant="contained"
-              color="warning"
-              startIcon={<SaveIcon />}
-              sx={{ marginBottom: 2, marginRight: 5 }}
-            >
-              Report Error
-            </Button>
+              title={"Report Bug For "+selectedApi?.name+" Api"}
+              desc={"Please add a Description For better understanding of this Bug"}
+            />
           </dev>
 
           <div className="console-container">
