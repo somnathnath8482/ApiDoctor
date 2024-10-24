@@ -37,7 +37,7 @@ const BugList = ({ bugs, onBugSelect }) => {
   return (
     <Grid2 container spacing={3} sx={{ margin: 3 }}>
       {bugList.map((bug) => (
-        <Grid2 item size={4} key={bug.id} onClick = {()=>{navigate("/bug-info")}}>
+        <Grid2 item size={4} key={bug.id} onClick = {()=>{onBugSelect(bug)}}>
           <Card sx={{ boxShadow: 3, height: 200 }}>
             <CardContent>
               <Typography variant="h6" component="div" gutterBottom>
@@ -54,7 +54,7 @@ const BugList = ({ bugs, onBugSelect }) => {
               </Typography>
 
               <Typography variant="body2" color="text.secondary">
-                Assigned To: Somnath
+                Assigned To: {bug?.editor!=null? bug?.editor?.name:"Not Assigned"}
               </Typography>
               <Chip
                 label={bug.status}

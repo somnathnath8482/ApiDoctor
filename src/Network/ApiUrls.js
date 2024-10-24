@@ -21,5 +21,7 @@ export const ApiUrls = {
   deleteProject: BaseUrl + "projects/",
   addNotification: BaseUrl + "notifications/add",
   addBug: BaseUrl + "bug/add",
+  getNotification: BaseUrl + "notifications",
+  getBug: BaseUrl + "bug/",
 
 };

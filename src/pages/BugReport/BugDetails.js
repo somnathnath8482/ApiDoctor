@@ -16,6 +16,7 @@ import TaskToolbar from "../../common/TaskToolbar";
 import { useTheme } from "@emotion/react";
 
 import "../../css/ConsoleBlock.css";
+import { useLocation } from "react-router-dom";
 const bugData = {
   id: 1,
   title: "API endpoint returning incorrect response",
@@ -49,10 +50,14 @@ const bugData = {
 };
 
 const BugDetails = () => {
-  const [status, setStatus] = useState(bugData.status);
+  const location = useLocation();
+  const { bug } = location.state;
+  const [status, setStatus] = useState(bug?.status);
   const [newComment, setNewComment] = useState("");
   const [comments, setComments] = useState(bugData.comments);
-
+ 
+  
+  // console.log('Selected Bug:', bug); // This could trigger a navigation to the details page
   const theme = useTheme();
   const handleStatusChange = (event) => {
     setStatus(event.target.value);
@@ -84,7 +89,17 @@ const BugDetails = () => {
       <Card sx={{ margin: "auto", overflowY: "auto", padding: 3 }}>
         <CardContent>
           <Typography variant="h4" gutterBottom>
-            {bugData.title}
+            {bug.title}
+          </Typography>
+
+          {/* Bug Description */}
+          <Typography
+            variant="body1"
+            color="text.secondary"
+            gutterBottom
+            sx={{ mt: 2 }}
+          >
+            {bug.description}
           </Typography>
 
           {/* Request/Response Scenario */}
@@ -102,14 +117,7 @@ const BugDetails = () => {
                   className="console-content"
                   style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}
                 >
-                  <strong>Method:</strong> {bugData.request.method}
-                  <br />
-                  <strong>URL:</strong> {bugData.request.url}
-                  <br />
-                  <strong>Headers:</strong>{" "}
-                  {JSON.stringify(bugData.request.headers, null, 2)}
-                  <br />
-                  <strong>Body:</strong> {bugData.request.body}
+                  {JSON.parse(bug?.stacktrace).req}
                 </pre>
               </div>
               <Typography variant="subtitle1" gutterBottom>
@@ -120,23 +128,11 @@ const BugDetails = () => {
                   className="console-content"
                   style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}
                 >
-                  <strong>Status:</strong> {bugData.response.status}
-                  <br />
-                  <strong>Body:</strong> {bugData.response.body}
+                  {JSON.parse(bug?.stacktrace)?.res}
                 </pre>
               </div>
             </Box>
           </Box>
-
-          {/* Bug Description */}
-          <Typography
-            variant="body1"
-            color="text.secondary"
-            gutterBottom
-            sx={{ mt: 2 }}
-          >
-            {bugData.description}
-          </Typography>
 
           {/* Reported By and Assigned To */}
           <Grid container spacing={2} alignItems="center" sx={{ mb: 2, mt: 2 }}>
@@ -145,8 +141,8 @@ const BugDetails = () => {
                 <strong>Reported by:</strong>
               </Typography>
               <Chip
-                avatar={<Avatar>{bugData.reportedBy.name.charAt(0)}</Avatar>}
-                label={bugData.reportedBy.name}
+                avatar={<Avatar>{bug?.reporter?.name.charAt(0)}</Avatar>}
+                label={bug?.reporter?.name}
                 color="default"
               />
             </Grid>
@@ -154,11 +150,17 @@ const BugDetails = () => {
               <Typography variant="subtitle1">
                 <strong>Assigned to:</strong>
               </Typography>
-              <Chip
-                avatar={<Avatar>{bugData.assignedTo.name.charAt(0)}</Avatar>}
-                label={bugData.assignedTo.name}
-                color="primary"
-              />
+              {bug?.editor != null ? (
+                <Chip
+                  avatar={<Avatar>{bugData.assignedTo.name.charAt(0)}</Avatar>}
+                  label={bugData.assignedTo.name}
+                  color="primary"
+                />
+              ) : (
+                <Typography variant="subtitle1" style={{ color: "#F56F70" }}>
+                  <strong>Not Assigned</strong>
+                </Typography>
+              )}
             </Grid>
           </Grid>
 
@@ -175,8 +177,8 @@ const BugDetails = () => {
                 variant="outlined"
                 size="small"
               >
-                <MenuItem value="New">New</MenuItem>
-                <MenuItem value="In Progress">In Progress</MenuItem>
+                <MenuItem value="Open">Open</MenuItem>
+                <MenuItem value="InProgress">In Progress</MenuItem>
                 <MenuItem value="Resolved">Resolved</MenuItem>
                 <MenuItem value="Closed">Closed</MenuItem>
               </Select>
@@ -197,7 +199,7 @@ const BugDetails = () => {
           <Typography variant="h6" sx={{ mt: 3 }}>
             Comments
           </Typography>
-          <div  style={{  overflowY:'auto', padding:10 }}>
+          <div style={{ overflowY: "auto", padding: 10 }}>
             {comments.map((comment, index) => (
               <Card key={index} sx={{ mb: 2, p: 2 }}>
                 <Typography variant="subtitle1">{comment.author}</Typography>
