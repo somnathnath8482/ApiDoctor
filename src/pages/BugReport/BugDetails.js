@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -17,6 +17,10 @@ import { useTheme } from "@emotion/react";
 
 import "../../css/ConsoleBlock.css";
 import { useLocation } from "react-router-dom";
+import { GetRequest, PostRequestFormData } from "../../Network/ApiRequests";
+import { ApiUrls } from "../../Network/ApiUrls";
+import { UserContext } from "../../context/MyContext";
+import { FormateDate } from "../../utill/Helper";
 const bugData = {
   id: 1,
   title: "API endpoint returning incorrect response",
@@ -51,12 +55,18 @@ const bugData = {
 
 const BugDetails = () => {
   const location = useLocation();
-  const { bug } = location.state;
+  const { selectedBug } = location.state;
+
+  const [bug, setBug] = useState(selectedBug);
   const [status, setStatus] = useState(bug?.status);
   const [newComment, setNewComment] = useState("");
   const [comments, setComments] = useState(bugData.comments);
- 
-  
+  const [timeLine, setTimeLine] = useState([]);
+  const [selectTedEditor, setSelectTedEditor] = useState(null);
+
+  const { token, mUser } = useContext(UserContext);
+  console.log(bug?.editor)
+
   // console.log('Selected Bug:', bug); // This could trigger a navigation to the details page
   const theme = useTheme();
   const handleStatusChange = (event) => {
@@ -77,6 +87,50 @@ const BugDetails = () => {
       setNewComment("");
     }
   };
+
+  const getTimeline = () => {
+    GetRequest(
+      ApiUrls.getBugTimeline + bug?.id,
+      {},
+      null,
+      token,
+      null,
+      null,
+      (res) => {
+        setTimeLine(res?.data);
+      },
+      null
+    );
+  };
+  
+  const updateStatus = (sta) => {
+
+    const formDatas = new FormData();
+
+    // Append fields to the FormData object
+    formDatas.append("bugId", bug?.id);
+    formDatas.append("status", sta);
+    formDatas.append("editorId", selectTedEditor?selectTedEditor?.id:"");
+
+
+    PostRequestFormData(
+      ApiUrls.updateBugStatus,
+      formDatas,
+      null,
+      token,
+      null,
+      null,
+      (res) => {
+        setBug(res?.data);
+        getTimeline();
+      },
+      null
+    );
+  };
+
+  useEffect(() => {
+    getTimeline();
+  }, []);
 
   return (
     <div
@@ -152,8 +206,8 @@ const BugDetails = () => {
               </Typography>
               {bug?.editor != null ? (
                 <Chip
-                  avatar={<Avatar>{bugData.assignedTo.name.charAt(0)}</Avatar>}
-                  label={bugData.assignedTo.name}
+                  avatar={<Avatar>{bug?.editor?.name?.charAt(0)}</Avatar>}
+                  label={bug?.editor?.name}
                   color="primary"
                 />
               ) : (
@@ -166,7 +220,7 @@ const BugDetails = () => {
 
           {/* Status */}
           <Grid container spacing={2} alignItems="center" sx={{ mb: 2 }}>
-            <Grid item xs={6}>
+            <Grid item xs={5}>
               <Typography variant="subtitle1">
                 <strong>Status:</strong>
               </Typography>
@@ -183,15 +237,47 @@ const BugDetails = () => {
                 <MenuItem value="Closed">Closed</MenuItem>
               </Select>
             </Grid>
+
+            <Grid item xs={5}>
+              <Typography variant="subtitle1">
+                <strong>Assign the Bug To:</strong>
+              </Typography>
+              <Select
+                value={status}
+                onChange={handleStatusChange}
+                fullWidth
+                variant="outlined"
+                size="small"
+              >
+                <MenuItem value="Open">Open</MenuItem>
+                <MenuItem value="InProgress">In Progress</MenuItem>
+                <MenuItem value="Resolved">Resolved</MenuItem>
+                <MenuItem value="Closed">Closed</MenuItem>
+              </Select>
+            </Grid>
+
+            <Grid item xs={2}>
+            <Typography variant="subtitle1">
+                <strong>Update Status:</strong>
+              </Typography>
+              <Button
+                variant="contained"
+                color="primary"
+                sx={{ marginBottom: 2 }}
+                onClick={()=>{updateStatus(status)}}
+              >
+                Update
+              </Button>
+            </Grid>
           </Grid>
 
           {/* Timeline */}
           <Typography variant="h6" sx={{ mt: 3 }}>
             Timeline
           </Typography>
-          {bugData.history.map((entry, index) => (
+          {timeLine.map((entry, index) => (
             <Typography key={index} variant="body2" color="text.secondary">
-              {entry.date} - {entry.action} by {entry.author}
+              {FormateDate(entry.createdAt)} - {entry.description}
             </Typography>
           ))}
 

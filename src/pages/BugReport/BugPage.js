@@ -42,7 +42,7 @@ const BugPage = () => {
   const handleBugSelect = (bug) => {
     setSelectedBug(bug);
     navigate("/bug-info",{
-        state: {bug: bug },
+        state: {selectedBug: bug },
     })
    
   };
