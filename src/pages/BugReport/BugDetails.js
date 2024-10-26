@@ -17,7 +17,7 @@ import { useTheme } from "@emotion/react";
 
 import "../../css/ConsoleBlock.css";
 import { useLocation } from "react-router-dom";
-import { GetRequest, PostRequestFormData } from "../../Network/ApiRequests";
+import { GetRequest, PostRequestFormData, PostRequestJson } from "../../Network/ApiRequests";
 import { ApiUrls } from "../../Network/ApiUrls";
 import { UserContext } from "../../context/MyContext";
 import { FormateDate } from "../../utill/Helper";
@@ -61,7 +61,7 @@ const BugDetails = () => {
   const [bug, setBug] = useState(selectedBug);
   const [status, setStatus] = useState(bug?.status);
   const [newComment, setNewComment] = useState("");
-  const [comments, setComments] = useState(bugData.comments);
+  const [comments, setComments] = useState([]);
   const [timeLine, setTimeLine] = useState([]);
   const [selectTedEditor, setSelectTedEditor] = useState(null);
   const [users, setUsers] = useState([]);
@@ -77,16 +77,34 @@ const BugDetails = () => {
 
   const handleCommentSubmit = () => {
     if (newComment.trim()) {
-      const updatedComments = [
-        ...comments,
-        {
-          author: "You",
-          text: newComment,
-          date: new Date().toISOString().split("T")[0],
-        },
-      ];
-      setComments(updatedComments);
+      
+
+
+      let obj ={
+        bugId:bug?.id,
+        projectId:bug?.project?.id,
+        description:newComment
+      }
+
+      PostRequestJson(
+        ApiUrls.sendBugMessage,
+        obj,
+        null,
+        token,
+        null,
+        null,
+        (res) => {
+          const updatedComments = [
+            ...comments,
+            res?.data
+          ];
+          setComments(updatedComments);
       setNewComment("");
+        },
+        null
+      );
+
+      
     }
   };
 
@@ -100,6 +118,22 @@ const BugDetails = () => {
       null,
       (res) => {
         setTimeLine(res?.data);
+      },
+      null
+    );
+  },[bug])
+
+
+  const getbugMessages = useCallback(()=>{
+    GetRequest(
+      ApiUrls.getBugMessage + bug?.id,
+      {},
+      null,
+      token,
+      null,
+      null,
+      (res) => {
+        setComments(res?.data)
       },
       null
     );
@@ -161,6 +195,7 @@ const BugDetails = () => {
   useEffect(() => {
     getAllUsers();
     getTimeline();
+    getbugMessages();
     updateUi();
   }, []);
 
@@ -175,7 +210,11 @@ const BugDetails = () => {
       <Card sx={{ margin: "auto", overflowY: "auto", padding: 3 }}>
         <CardContent>
           <Typography variant="h4" gutterBottom>
-            {bug.title}
+            {bug.title} <Chip
+                label={bug.severity}
+                color={'warning'}
+                
+              />
           </Typography>
 
           {/* Bug Description */}
@@ -317,12 +356,12 @@ const BugDetails = () => {
           <div style={{ overflowY: "auto", padding: 10 }}>
             {comments.map((comment, index) => (
               <Card key={index} sx={{ mb: 2, p: 2 }}>
-                <Typography variant="subtitle1">{comment.author}</Typography>
+                <Typography variant="subtitle1">{comment?.sender?.name}</Typography>
                 <Typography variant="body2" color="text.secondary">
-                  {comment.date}
+                  {FormateDate(comment?.createdAt)}
                 </Typography>
                 <Typography variant="body2" sx={{ mt: 1 }}>
-                  {comment.text}
+                  {comment.description}
                 </Typography>
               </Card>
             ))}

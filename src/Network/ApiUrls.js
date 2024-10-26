@@ -25,5 +25,7 @@ export const ApiUrls = {
   getBug: BaseUrl + "bug/",
   getBugTimeline: BaseUrl + "bug/timeline/",
   updateBugStatus: BaseUrl + "bug/update-status",
+  sendBugMessage: BaseUrl + "bug/messages",
+  getBugMessage: BaseUrl + "bug/messages/",
 
 };
