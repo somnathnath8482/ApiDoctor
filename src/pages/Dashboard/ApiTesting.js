@@ -325,14 +325,14 @@ const ApiTesting = ({ setSelectedPage, data }) => {
     a.click();
   };
 
-  const reportError = (msg) => {
+  const reportError = (msg,severity) => {
     const stackTrace = {
       req: req,
       res: response,
     };
-
+//Critical, Major, Minor
     const errr = {
-      severity: "Critical",
+      severity: severity,
       apiName: selectedApi?.name,
       apiEndpoint: url,
       stacktrace: JSON.stringify(stackTrace),

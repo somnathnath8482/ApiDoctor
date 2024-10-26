@@ -6,9 +6,12 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
+import { MenuItem, Select } from "@mui/material";
+import { Fonts } from "../assets/fonts/Fonts";
 
 export default function FormDialog({ ActionButton, onClick,title, desc, placeholder }) {
   const [open, setOpen] = React.useState(false);
+  const [severity, setServerity] = React.useState("Critical");
 
   const handleClickOpen = ({}) => {
     setOpen(true);
@@ -34,7 +37,7 @@ export default function FormDialog({ ActionButton, onClick,title, desc, placehol
             const email = formJson.email;
             
             handleClose();
-            onClick(email);
+            onClick(email,severity);
           },
         }}
       >
@@ -43,6 +46,29 @@ export default function FormDialog({ ActionButton, onClick,title, desc, placehol
           <DialogContentText>
            {desc}
           </DialogContentText>
+          <div style={{display:'flex', flexDirection:'row' , alignItems:'center', gap:5}}>
+
+          <Select
+              labelId="demo-simple-select-label"
+              id="demo-simple-select"
+              value={severity}
+              label="Severity"
+              style={{ fontFamily: Fonts.roboto_mono }}
+              onChange={(e) => setServerity(e.target.value)}
+              sx={{height:40}}
+             >
+              <MenuItem value="Critical" style={{ fontFamily: Fonts.roboto_mono }}>
+              Critical
+              </MenuItem>
+              <MenuItem value="Major" style={{ fontFamily: Fonts.roboto_mono }}>
+              Major
+              </MenuItem>
+              <MenuItem value="Minor" style={{ fontFamily: Fonts.roboto_mono }}>
+              Minor
+              </MenuItem>
+            
+            </Select>
+
           <TextField
             autoFocus
             required
@@ -55,6 +81,9 @@ export default function FormDialog({ ActionButton, onClick,title, desc, placehol
             fullWidth
             variant="standard"
           />
+
+          </div>
+          
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Cancel</Button>
