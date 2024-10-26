@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -21,6 +21,7 @@ import { GetRequest, PostRequestFormData } from "../../Network/ApiRequests";
 import { ApiUrls } from "../../Network/ApiUrls";
 import { UserContext } from "../../context/MyContext";
 import { FormateDate } from "../../utill/Helper";
+import VerticalTimeline from "./VerticalTimeline";
 const bugData = {
   id: 1,
   title: "API endpoint returning incorrect response",
@@ -63,9 +64,10 @@ const BugDetails = () => {
   const [comments, setComments] = useState(bugData.comments);
   const [timeLine, setTimeLine] = useState([]);
   const [selectTedEditor, setSelectTedEditor] = useState(null);
-
+  const [users, setUsers] = useState([]);
   const { token, mUser } = useContext(UserContext);
-  console.log(bug?.editor)
+  
+
 
   // console.log('Selected Bug:', bug); // This could trigger a navigation to the details page
   const theme = useTheme();
@@ -88,7 +90,7 @@ const BugDetails = () => {
     }
   };
 
-  const getTimeline = () => {
+  const getTimeline = useCallback(()=>{
     GetRequest(
       ApiUrls.getBugTimeline + bug?.id,
       {},
@@ -101,17 +103,39 @@ const BugDetails = () => {
       },
       null
     );
-  };
-  
-  const updateStatus = (sta) => {
+  },[bug])
 
+  const getAllUsers = useCallback(() => {
+    GetRequest(
+      ApiUrls.getProjectsAccess + bug?.project?.id,
+      {},
+      null,
+      token,
+      null,
+      null,
+      (res) => {
+        let sccess = res?.data;
+        let usrs = [];
+
+        sccess?.map((acc) => {
+          usrs.push({
+            name: acc?.user?.name,
+            id: acc?.user?.id,
+          });
+        });
+        setUsers(usrs);
+      },
+      null
+    );
+  }, [bug?.id]);
+
+  const updateStatus = (sta) => {
     const formDatas = new FormData();
 
     // Append fields to the FormData object
     formDatas.append("bugId", bug?.id);
     formDatas.append("status", sta);
-    formDatas.append("editorId", selectTedEditor?selectTedEditor?.id:"");
-
+    formDatas.append("editorId", selectTedEditor ? selectTedEditor : "");
 
     PostRequestFormData(
       ApiUrls.updateBugStatus,
@@ -128,8 +152,16 @@ const BugDetails = () => {
     );
   };
 
+  const updateUi =  useCallback(()=>{
+    if(bug?.editor){
+      setSelectTedEditor(bug?.editor?.id);
+    }
+  },[bug])
+
   useEffect(() => {
+    getAllUsers();
     getTimeline();
+    updateUi();
   }, []);
 
   return (
@@ -243,28 +275,29 @@ const BugDetails = () => {
                 <strong>Assign the Bug To:</strong>
               </Typography>
               <Select
-                value={status}
-                onChange={handleStatusChange}
+                value={selectTedEditor?selectTedEditor:""}
+                onChange={(event)=>{setSelectTedEditor(event.target.value);}}
                 fullWidth
                 variant="outlined"
                 size="small"
               >
-                <MenuItem value="Open">Open</MenuItem>
-                <MenuItem value="InProgress">In Progress</MenuItem>
-                <MenuItem value="Resolved">Resolved</MenuItem>
-                <MenuItem value="Closed">Closed</MenuItem>
+                {users?.map((item) => {
+                  return <MenuItem value={item?.id}>{item?.name}</MenuItem>;
+                })}
               </Select>
             </Grid>
 
             <Grid item xs={2}>
-            <Typography variant="subtitle1">
+              <Typography variant="subtitle1">
                 <strong>Update Status:</strong>
               </Typography>
               <Button
                 variant="contained"
                 color="primary"
                 sx={{ marginBottom: 2 }}
-                onClick={()=>{updateStatus(status)}}
+                onClick={() => {
+                  updateStatus(status);
+                }}
               >
                 Update
               </Button>
@@ -275,12 +308,8 @@ const BugDetails = () => {
           <Typography variant="h6" sx={{ mt: 3 }}>
             Timeline
           </Typography>
-          {timeLine.map((entry, index) => (
-            <Typography key={index} variant="body2" color="text.secondary">
-              {FormateDate(entry.createdAt)} - {entry.description}
-            </Typography>
-          ))}
-
+          <VerticalTimeline stages={timeLine} />
+        
           {/* Comments Section */}
           <Typography variant="h6" sx={{ mt: 3 }}>
             Comments
