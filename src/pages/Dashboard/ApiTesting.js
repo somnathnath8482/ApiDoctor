@@ -1,6 +1,12 @@
 // ApiTesting.js
 
-import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   TextField,
   Button,
@@ -43,7 +49,12 @@ import {
 import { ApiUrls } from "../../Network/ApiUrls";
 import NoteEditor from "./Helper/NoteEditor";
 import FormDialog from "../../common/FormDialoug";
-const ApiTesting = ({ setSelectedPage, data }) => {
+import { useLocation } from "react-router-dom";
+import TaskToolbar from "../../common/TaskToolbar";
+const ApiTesting = () => {
+  const location = useLocation();
+  const { data } = location.state;
+
   const { env, projectId, projectName, selectedApipt, hasAccess } = data;
 
   const [selectedApi, setSelectedApi] = useState(selectedApipt);
@@ -325,22 +336,22 @@ const ApiTesting = ({ setSelectedPage, data }) => {
     a.click();
   };
 
-  const reportError = (msg,severity) => {
+  const reportError = (msg, severity) => {
     const stackTrace = {
       req: req,
       res: response,
     };
-//Critical, Major, Minor
+    //Critical, Major, Minor
     const errr = {
       severity: severity,
       apiName: selectedApi?.name,
       apiEndpoint: url,
       stacktrace: JSON.stringify(stackTrace),
       envName: env?.name,
-      description:msg,
+      description: msg,
       reporterId: mUser?.id,
       envId: env?.id,
-      title: "New bug reported By "+ mUser?.name,
+      title: "New bug reported By " + mUser?.name,
       projectId: projectId,
       apiId: selectedApi?.id,
       status: "Open",
@@ -385,321 +396,323 @@ const ApiTesting = ({ setSelectedPage, data }) => {
     return formattedRequest;
   };
 
-
   const ReportActionButton = useCallback(() => {
     return (
       <Button
-             
-              variant="contained"
-              color="warning"
-              startIcon={<SaveIcon />}
-              sx={{ marginBottom: 2, marginRight: 5 }}
-            >
-              Report Error
-            </Button>
+        variant="contained"
+        color="warning"
+        startIcon={<SaveIcon />}
+        sx={{ marginBottom: 2, marginRight: 5 }}
+      >
+        Report Error
+      </Button>
     );
   }, []);
 
   return (
     <Box
       sx={{
-        padding: 3,
         backgroundColor: theme.palette.background.default,
         minHeight: 700,
       }}
     >
-      <Typography
-        gutterBottom
-        style={{
-          color: theme.palette.text.primary,
-          fontFamily: Fonts.roboto_mono,
-          fontWeight: "bold",
-          marginBottom: 0,
-          fontSize: 30,
-        }}
-      >
-        Api Testing
-      </Typography>
-
-      <div
-        style={{
-          flexDirection: "row",
-          display: "flex",
-          alignItems: "center",
-          gap: 2,
-        }}
-      >
-        <div
-          style={{
-            backgroundColor: theme.palette.primary.main,
-            height: 5,
-            width: 30,
-          }}
-        />
-        <div
-          style={{
-            backgroundColor: theme.palette.text.primary,
-            height: 1,
-            width: 135,
-          }}
-        />
-      </div>
-
-      <div
-        style={{
-          marginTop: 10,
-        }}
-      >
+      <TaskToolbar setState={false} backenabled={true} />
+      <div style={{ padding: 20 }}>
         <Typography
           gutterBottom
           style={{
             color: theme.palette.text.primary,
             fontFamily: Fonts.roboto_mono,
-
+            fontWeight: "bold",
             marginBottom: 0,
-            fontSize: 20,
-            markerStart: 15,
+            fontSize: 30,
           }}
         >
-          {projectName}
+          Api Testing
         </Typography>
 
-        <Typography
-          gutterBottom
-          style={{
-            color: theme.palette.text.primary,
-            fontFamily: Fonts.roboto_mono,
-
-            marginBottom: 0,
-            fontSize: 15,
-            markerStart: 15,
-          }}
-        >
-          Enviromewnt: {env.name}
-        </Typography>
-      </div>
-
-      <Paper
-        elevation={3}
-        sx={{
-          marginTop: 5,
-          borderRadius: 3,
-          display: "flex",
-          flexDirection: "column",
-          gap: 2,
-          padding: 2,
-          marginBottom: 2,
-        }}
-      >
-        <TextField
-          label="Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          fullWidth={false}
-          variant="outlined"
-          required
-          style={{ flex: 1, fontFamily: Fonts.roboto_mono }}
-          disabled={!hasAccess}
-        />
-
-        <TextField
-          label="Description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          fullWidth={false}
-          variant="outlined"
-          required
-          style={{ flex: 1, fontFamily: Fonts.roboto_mono }}
-          disabled={!hasAccess}
-        />
         <div
           style={{
-            display: "flex",
             flexDirection: "row",
+            display: "flex",
             alignItems: "center",
-            justifyContent: "space-between",
+            gap: 2,
           }}
         >
-          <FormControl fullWidth style={{ flex: 0.1 }}>
+          <div
+            style={{
+              backgroundColor: theme.palette.primary.main,
+              height: 5,
+              width: 30,
+            }}
+          />
+          <div
+            style={{
+              backgroundColor: theme.palette.text.primary,
+              height: 1,
+              width: 135,
+            }}
+          />
+        </div>
+
+        <div
+          style={{
+            marginTop: 10,
+          }}
+        >
+          <Typography
+            gutterBottom
+            style={{
+              color: theme.palette.text.primary,
+              fontFamily: Fonts.roboto_mono,
+
+              marginBottom: 0,
+              fontSize: 20,
+              markerStart: 15,
+            }}
+          >
+            {projectName}
+          </Typography>
+
+          <Typography
+            gutterBottom
+            style={{
+              color: theme.palette.text.primary,
+              fontFamily: Fonts.roboto_mono,
+
+              marginBottom: 0,
+              fontSize: 15,
+              markerStart: 15,
+            }}
+          >
+            Enviromewnt: {env.name}
+          </Typography>
+        </div>
+
+        <Paper
+          elevation={3}
+          sx={{
+            marginTop: 5,
+            borderRadius: 3,
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+            padding: 2,
+            marginBottom: 2,
+          }}
+        >
+          <TextField
+            label="Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            fullWidth={false}
+            variant="outlined"
+            required
+            style={{ flex: 1, fontFamily: Fonts.roboto_mono }}
+            disabled={!hasAccess}
+          />
+
+          <TextField
+            label="Description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            fullWidth={false}
+            variant="outlined"
+            required
+            style={{ flex: 1, fontFamily: Fonts.roboto_mono }}
+            disabled={!hasAccess}
+          />
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <FormControl fullWidth style={{ flex: 0.1 }}>
+              <InputLabel
+                style={{ fontFamily: Fonts.roboto_mono }}
+                id="demo-simple-select-label"
+              >
+                HTTP Method
+              </InputLabel>
+              <Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                value={method}
+                label="Request Method"
+                style={{ fontFamily: Fonts.roboto_mono }}
+                onChange={(e) => setMethod(e.target.value)}
+                disabled={!hasAccess}
+              >
+                <MenuItem value="GET" style={{ fontFamily: Fonts.roboto_mono }}>
+                  GET
+                </MenuItem>
+                <MenuItem
+                  value="POST"
+                  style={{ fontFamily: Fonts.roboto_mono }}
+                >
+                  POST
+                </MenuItem>
+                <MenuItem value="PUT" style={{ fontFamily: Fonts.roboto_mono }}>
+                  PUT
+                </MenuItem>
+                <MenuItem
+                  value="DELETE"
+                  style={{ fontFamily: Fonts.roboto_mono }}
+                >
+                  DELETE
+                </MenuItem>
+              </Select>
+            </FormControl>
+
+            <TextField
+              label="API Endpoint URL"
+              value={endpoint}
+              onChange={(e) => {
+                setEndPoint(e.target.value);
+              }}
+              fullWidth={false}
+              variant="outlined"
+              placeholder={env?.baseUrl + "/**"}
+              style={{ flex: 0.895, fontFamily: Fonts.roboto_mono }}
+              disabled={!hasAccess}
+            />
+          </div>
+        </Paper>
+
+        <Paper
+          elevation={3}
+          sx={{ padding: 2, marginBottom: 2, borderRadius: 3 }}
+        >
+          <Typography
+            style={{
+              color: theme.palette.text.primary,
+              fontFamily: Fonts.roboto_mono,
+              marginBottom: 0,
+              fontSize: 20,
+            }}
+          >
+            Headers
+          </Typography>
+          <List
+            style={{
+              marginTop: 0,
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 5,
+            }}
+          >
+            <TextField
+              label="Header Key"
+              value={headerkey}
+              onChange={(e) => handleChangeHeader("key", e.target.value)}
+              fullWidth
+              variant="outlined"
+              sx={{ marginRight: 1 }}
+              style={{ flex: 0.22 }}
+              disabled={!hasAccess}
+            />
+            <TextField
+              label="Header Value"
+              value={headervalue}
+              onChange={(e) => handleChangeHeader("value", e.target.value)}
+              fullWidth
+              variant="outlined"
+              sx={{ marginRight: 1 }}
+              style={{ flex: 1 }}
+              disabled={!hasAccess}
+            />
+            <Tooltip title="Add Header" placement="left" style={{ flex: 1 }}>
+              <AddIcon
+                style={{
+                  backgroundColor: theme.palette.primary.main,
+                  borderRadius: 5,
+                  padding: 5,
+                  alignSelf: "center",
+                  color: theme.palette.common.white,
+                  width: 45,
+                  height: 50,
+                }}
+                onClick={handleAddHeader}
+              />
+            </Tooltip>
+          </List>
+
+          <List>
+            {headers.map((header, index) => (
+              <ListItem
+                key={index}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: 0,
+                }}
+              >
+                <ListItemText
+                  secondary={`${header.key} : ${header.value}`}
+                  style={{
+                    display: "flex",
+                    fontSize: "0.9rem", // Correct font size
+                    marginBottom: -11,
+                    fontFamily: "cursive",
+                    overflowX: "auto", // Enables horizontal scrolling
+                    whiteSpace: "nowrap", // Keeps the text in a single line
+                    maxWidth: "100%", // Adjust the width for the text container
+                  }}
+                />
+                <IconButton onClick={() => handleRemoveHeader(index)}>
+                  <DeleteIcon />
+                </IconButton>
+              </ListItem>
+            ))}
+          </List>
+        </Paper>
+        <Paper
+          elevation={3}
+          sx={{ padding: 2, marginBottom: 2, borderRadius: 3 }}
+        >
+          <FormControl fullWidth style={{ flex: 0.2 }}>
             <InputLabel
               style={{ fontFamily: Fonts.roboto_mono }}
               id="demo-simple-select-label"
             >
-              HTTP Method
+              Content-Type
             </InputLabel>
             <Select
               labelId="demo-simple-select-label"
               id="demo-simple-select"
-              value={method}
+              value={contentType}
               label="Request Method"
               style={{ fontFamily: Fonts.roboto_mono }}
-              onChange={(e) => setMethod(e.target.value)}
+              onChange={(e) => setContentType(e.target.value)}
               disabled={!hasAccess}
             >
-              <MenuItem value="GET" style={{ fontFamily: Fonts.roboto_mono }}>
-                GET
-              </MenuItem>
-              <MenuItem value="POST" style={{ fontFamily: Fonts.roboto_mono }}>
-                POST
-              </MenuItem>
-              <MenuItem value="PUT" style={{ fontFamily: Fonts.roboto_mono }}>
-                PUT
-              </MenuItem>
               <MenuItem
-                value="DELETE"
+                value="application/json"
                 style={{ fontFamily: Fonts.roboto_mono }}
               >
-                DELETE
+                Application/json
+              </MenuItem>
+              <MenuItem
+                value="multipart/form-data"
+                style={{ fontFamily: Fonts.roboto_mono }}
+              >
+                Multipart/form-data
               </MenuItem>
             </Select>
           </FormControl>
-
-          <TextField
-            label="API Endpoint URL"
-            value={endpoint}
-            onChange={(e) => {
-              setEndPoint(e.target.value);
-            }}
-            fullWidth={false}
-            variant="outlined"
-            placeholder={env?.baseUrl + "/**"}
-            style={{ flex: 0.895, fontFamily: Fonts.roboto_mono }}
-            disabled={!hasAccess}
-          />
-        </div>
-      </Paper>
-
-      <Paper
-        elevation={3}
-        sx={{ padding: 2, marginBottom: 2, borderRadius: 3 }}
-      >
-        <Typography
-          style={{
-            color: theme.palette.text.primary,
-            fontFamily: Fonts.roboto_mono,
-            marginBottom: 0,
-            fontSize: 20,
-          }}
-        >
-          Headers
-        </Typography>
-        <List
-          style={{
-            marginTop: 0,
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 5,
-          }}
-        >
-          <TextField
-            label="Header Key"
-            value={headerkey}
-            onChange={(e) => handleChangeHeader("key", e.target.value)}
-            fullWidth
-            variant="outlined"
-            sx={{ marginRight: 1 }}
-            style={{ flex: 0.22 }}
-            disabled={!hasAccess}
-          />
-          <TextField
-            label="Header Value"
-            value={headervalue}
-            onChange={(e) => handleChangeHeader("value", e.target.value)}
-            fullWidth
-            variant="outlined"
-            sx={{ marginRight: 1 }}
-            style={{ flex: 1 }}
-            disabled={!hasAccess}
-          />
-          <Tooltip title="Add Header" placement="left" style={{ flex: 1 }}>
-            <AddIcon
-              style={{
-                backgroundColor: theme.palette.primary.main,
-                borderRadius: 5,
-                padding: 5,
-                alignSelf: "center",
-                color: theme.palette.common.white,
-                width: 45,
-                height: 50,
-              }}
-              onClick={handleAddHeader}
-            />
-          </Tooltip>
-        </List>
-
-        <List>
-          {headers.map((header, index) => (
-            <ListItem
-              key={index}
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: 0,
-              }}
-            >
-              <ListItemText
-                secondary={`${header.key} : ${header.value}`}
-                style={{
-                  display: "flex",
-                  fontSize: "0.9rem", // Correct font size
-                  marginBottom: -11,
-                  fontFamily: "cursive",
-                  overflowX: "auto", // Enables horizontal scrolling
-                  whiteSpace: "nowrap", // Keeps the text in a single line
-                  maxWidth: "100%", // Adjust the width for the text container
-                }}
+          {contentType === "application/json" ? (
+            <div style={{ marginTop: 10 }}>
+              <NoteEditor
+                note={jsonNote}
+                setNote={SetJsonNote}
+                placeholde="Addational note / message for JSON Body"
               />
-              <IconButton onClick={() => handleRemoveHeader(index)}>
-                <DeleteIcon />
-              </IconButton>
-            </ListItem>
-          ))}
-        </List>
-      </Paper>
-      <Paper
-        elevation={3}
-        sx={{ padding: 2, marginBottom: 2, borderRadius: 3 }}
-      >
-        <FormControl fullWidth style={{ flex: 0.2 }}>
-          <InputLabel
-            style={{ fontFamily: Fonts.roboto_mono }}
-            id="demo-simple-select-label"
-          >
-            Content-Type
-          </InputLabel>
-          <Select
-            labelId="demo-simple-select-label"
-            id="demo-simple-select"
-            value={contentType}
-            label="Request Method"
-            style={{ fontFamily: Fonts.roboto_mono }}
-            onChange={(e) => setContentType(e.target.value)}
-            disabled={!hasAccess}
-          >
-            <MenuItem
-              value="application/json"
-              style={{ fontFamily: Fonts.roboto_mono }}
-            >
-              Application/json
-            </MenuItem>
-            <MenuItem
-              value="multipart/form-data"
-              style={{ fontFamily: Fonts.roboto_mono }}
-            >
-              Multipart/form-data
-            </MenuItem>
-          </Select>
-        </FormControl>
-        {contentType === "application/json" ? (
-          <div style={{ marginTop: 10 }}>
-            <NoteEditor
-              note={jsonNote}
-              setNote={SetJsonNote}
-              placeholde="Addational note / message for JSON Body"
-            />
-            {/* <TextField
+              {/* <TextField
               label="Addational Note"
               id="outlined-size-small"
               multiline
@@ -708,26 +721,26 @@ const ApiTesting = ({ setSelectedPage, data }) => {
               value={jsonNote}
               onChange={(e) => SetJsonNote(e.target.value)}
             /> */}
-            <TextField
-              label="Request Body (JSON)"
-              value={body}
-              onChange={(e) => setBody(e.target.value)}
-              fullWidth
-              multiline
-              rows={6}
-              margin="normal"
-              variant="outlined"
-              disabled={!hasAccess}
-            />
-          </div>
-        ) : (
-          <Box style={{ marginTop: 20 }}>
-            <NoteEditor
-              note={formDataNote}
-              setNote={setFormDataNote}
-              placeholde="Addational note / message for below Parameter"
-            />
-            {/* <TextField
+              <TextField
+                label="Request Body (JSON)"
+                value={body}
+                onChange={(e) => setBody(e.target.value)}
+                fullWidth
+                multiline
+                rows={6}
+                margin="normal"
+                variant="outlined"
+                disabled={!hasAccess}
+              />
+            </div>
+          ) : (
+            <Box style={{ marginTop: 20 }}>
+              <NoteEditor
+                note={formDataNote}
+                setNote={setFormDataNote}
+                placeholde="Addational note / message for below Parameter"
+              />
+              {/* <TextField
               label="Addational Note"
               id="outlined-size-small"
               multiline
@@ -736,259 +749,267 @@ const ApiTesting = ({ setSelectedPage, data }) => {
               value={formDataNote}
               onChange={(e) => setFormDataNote(e.target.value)}
             /> */}
-            <div
-              style={{
-                flexDirection: "row",
-                display: "flex",
-                alignItems: "center",
-                marginTop: 20,
-              }}
-            >
-              <TextField
-                error={formKeyError}
-                label="Key"
-                value={formDataKey}
-                onChange={(e) => {
-                  setFormKeyError(false);
-                  setFormDataKey(e.target.value);
+              <div
+                style={{
+                  flexDirection: "row",
+                  display: "flex",
+                  alignItems: "center",
+                  marginTop: 20,
                 }}
-                fullWidth
-                variant="outlined"
-                sx={{ marginRight: 1, flex: 0.2 }}
-                disabled={!hasAccess}
-              />
-              <TextField
-                error={formValueError}
-                label="Value"
-                value={formDataValue}
-                onChange={(e) => {
-                  setFormValueError(false);
-                  setFormDataValue(e.target.value);
-                }}
-                fullWidth
-                variant="outlined"
-                sx={{ marginRight: 1, flex: 1 }}
-                disabled={!hasAccess}
-              />
-              <Tooltip title="Add Param" placement="left" style={{ flex: 1 }}>
-                <AddIcon
-                  style={{
-                    backgroundColor: theme.palette.primary.main,
-                    borderRadius: 5,
-                    padding: 5,
-                    alignSelf: "center",
-                    color: theme.palette.common.white,
-                    width: 45,
-                    height: 50,
+              >
+                <TextField
+                  error={formKeyError}
+                  label="Key"
+                  value={formDataKey}
+                  onChange={(e) => {
+                    setFormKeyError(false);
+                    setFormDataKey(e.target.value);
                   }}
-                  onClick={handleAddFormData}
+                  fullWidth
+                  variant="outlined"
+                  sx={{ marginRight: 1, flex: 0.2 }}
+                  disabled={!hasAccess}
                 />
-              </Tooltip>
-            </div>
-
-            <List>
-              {formData.map((field, index) => (
-                <ListItem
-                  key={index}
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    padding: 0,
+                <TextField
+                  error={formValueError}
+                  label="Value"
+                  value={formDataValue}
+                  onChange={(e) => {
+                    setFormValueError(false);
+                    setFormDataValue(e.target.value);
                   }}
-                >
-                  <ListItemText
-                    secondary={
-                      <span
-                        style={{
-                          color: theme.palette.text.secondary,
-                          display: "flex",
-                          flexDirection: "row",
-                          gap: 30,
-                        }}
-                      >
-                        <Typography
-                          gutterBottom
-                          style={{
-                            color: theme.palette.text.primary,
-                            fontFamily: Fonts.roboto_mono,
-                            marginBottom: 10,
-                            marginTop: 0,
-                            fontSize: 16,
-                          }}
-                        >
-                          {`${field.key} : ${field.value}`}
-                        </Typography>
-                        {field.note && (
-                          <span
-                            style={{
-                              alignItems: "center",
-                              display: "flex",
-                              flexDirection: "row",
-                            }}
-                          >
-                            <EditNoteOutlinedIcon />
-                            <Typography
-                              gutterBottom
-                              style={{
-                                color: theme.palette.text.primary,
-                                fontFamily: Fonts.roboto_mono,
-                                marginBottom: 10,
-                                marginTop: 0,
-                                fontSize: 11,
-                              }}
-                            >
-                              {field.note}
-                            </Typography>
-                          </span>
-                        )}
-                      </span>
-                    }
+                  fullWidth
+                  variant="outlined"
+                  sx={{ marginRight: 1, flex: 1 }}
+                  disabled={!hasAccess}
+                />
+                <Tooltip title="Add Param" placement="left" style={{ flex: 1 }}>
+                  <AddIcon
+                    style={{
+                      backgroundColor: theme.palette.primary.main,
+                      borderRadius: 5,
+                      padding: 5,
+                      alignSelf: "center",
+                      color: theme.palette.common.white,
+                      width: 45,
+                      height: 50,
+                    }}
+                    onClick={handleAddFormData}
+                  />
+                </Tooltip>
+              </div>
+
+              <List>
+                {formData.map((field, index) => (
+                  <ListItem
+                    key={index}
                     style={{
                       display: "flex",
-                      fontSize: "0.9rem", // Correct font size
-                      marginBottom: -11,
-                      fontFamily: "cursive",
-                      overflowX: "auto", // Enables horizontal scrolling
-                      whiteSpace: "nowrap", // Keeps the text in a single line
-                      maxWidth: "100%", // Adjust the width for the text container
-                    }}
-                  />
-                  <IconButton
-                    onClick={() => {
-                      handleEditFormData(index);
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      padding: 0,
                     }}
                   >
-                    <EditIcon />
-                  </IconButton>
+                    <ListItemText
+                      secondary={
+                        <span
+                          style={{
+                            color: theme.palette.text.secondary,
+                            display: "flex",
+                            flexDirection: "row",
+                            gap: 30,
+                          }}
+                        >
+                          <Typography
+                            gutterBottom
+                            style={{
+                              color: theme.palette.text.primary,
+                              fontFamily: Fonts.roboto_mono,
+                              marginBottom: 10,
+                              marginTop: 0,
+                              fontSize: 16,
+                            }}
+                          >
+                            {`${field.key} : ${field.value}`}
+                          </Typography>
+                          {field.note && (
+                            <span
+                              style={{
+                                alignItems: "center",
+                                display: "flex",
+                                flexDirection: "row",
+                              }}
+                            >
+                              <EditNoteOutlinedIcon />
+                              <Typography
+                                gutterBottom
+                                style={{
+                                  color: theme.palette.text.primary,
+                                  fontFamily: Fonts.roboto_mono,
+                                  marginBottom: 10,
+                                  marginTop: 0,
+                                  fontSize: 11,
+                                }}
+                              >
+                                {field.note}
+                              </Typography>
+                            </span>
+                          )}
+                        </span>
+                      }
+                      style={{
+                        display: "flex",
+                        fontSize: "0.9rem", // Correct font size
+                        marginBottom: -11,
+                        fontFamily: "cursive",
+                        overflowX: "auto", // Enables horizontal scrolling
+                        whiteSpace: "nowrap", // Keeps the text in a single line
+                        maxWidth: "100%", // Adjust the width for the text container
+                      }}
+                    />
+                    <IconButton
+                      onClick={() => {
+                        handleEditFormData(index);
+                      }}
+                    >
+                      <EditIcon />
+                    </IconButton>
 
-                  <IconButton onClick={() => handleRemoveFormData(index)}>
-                    <DeleteIcon />
-                  </IconButton>
-                </ListItem>
-              ))}
-            </List>
-          </Box>
-        )}
-      </Paper>
-      <div style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-        <Button
-          onClick={handleSendRequest}
-          variant="contained"
-          color="primary"
-          sx={{ marginBottom: 2 }}
-        >
-          Send Request
-        </Button>
-
-        {hasAccess && (
+                    <IconButton onClick={() => handleRemoveFormData(index)}>
+                      <DeleteIcon />
+                    </IconButton>
+                  </ListItem>
+                ))}
+              </List>
+            </Box>
+          )}
+        </Paper>
+        <div style={{ flexDirection: "row", alignItems: "center", gap: 50 }}>
           <Button
-            onClick={handleAddApi}
+            onClick={handleSendRequest}
             variant="contained"
             color="primary"
-            sx={{ marginBottom: 2, marginStart: 10 }}
+            sx={{ marginBottom: 2 }}
           >
-            {selectedApi ? "Update Api" : "Add Api"}
+            Send Request
           </Button>
-        )}
-      </div>
 
-      {!!error && (
-        <Alert variant="outlined" severity="error" sx={{ marginBottom: 3 }}>
-          {error}
-        </Alert>
-      )}
-
-      {!!success && (
-        <Alert variant="outlined" severity="success" sx={{ marginBottom: 3 }}>
-          {success}
-        </Alert>
-      )}
-
-      <Backdrop
-        sx={(theme) => ({ color: "#fff", zIndex: theme.zIndex.drawer + 1 })}
-        open={progress}
-      >
-        <CircularProgress color="inherit" />
-      </Backdrop>
-
-      {req && (
-        <Paper elevation={3} sx={{ padding: 2, borderRadius: 3 }}>
-          <dev
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "space-between",
-            }}
-          >
-            <Typography variant="h6" gutterBottom>
-              Request
-            </Typography>
-
-            <FormDialog
-              ActionButton={<ReportActionButton /> }
-              onClick={reportError}
-              title={"Report Bug For "+selectedApi?.name+" Api"}
-              desc={"Please add a Description For better understanding of this Bug"}
-            />
-          </dev>
-
-          <div className="console-container">
-            <pre
-              className="console-content"
-              style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}
+          {hasAccess && (
+            <Button
+              onClick={handleAddApi}
+              variant="contained"
+              color="primary"
+              sx={{ marginBottom: 2, marginStart: 10 }}
             >
-              {req}
-            </pre>
-          </div>
-        </Paper>
-      )}
+              {selectedApi ? "Update Api" : "Add Api"}
+            </Button>
+          )}
+        </div>
 
-      {response && (
-        <Paper elevation={3} sx={{ padding: 2, marginTop: 5, borderRadius: 3 }}>
-          <Typography variant="h6" gutterBottom>
-            Response
-          </Typography>
-          <Button
-            onClick={handleSaveResponse}
-            variant="contained"
-            color="secondary"
-            startIcon={<SaveIcon />}
-            sx={{ marginBottom: 2, marginRight: 5 }}
-          >
-            Save Response
-          </Button>
-          <FormControlLabel
-            control={
-              <Switch
-                checked={viewMode === "formatted"}
-                onChange={() =>
-                  setViewMode(viewMode === "formatted" ? "raw" : "formatted")
+        {!!error && (
+          <Alert variant="outlined" severity="error" sx={{ marginBottom: 3 }}>
+            {error}
+          </Alert>
+        )}
+
+        {!!success && (
+          <Alert variant="outlined" severity="success" sx={{ marginBottom: 3 }}>
+            {success}
+          </Alert>
+        )}
+
+        <Backdrop
+          sx={(theme) => ({ color: "#fff", zIndex: theme.zIndex.drawer + 1 })}
+          open={progress}
+        >
+          <CircularProgress color="inherit" />
+        </Backdrop>
+
+        {req && (
+          <Paper elevation={3} sx={{ padding: 2, borderRadius: 3 }}>
+            <dev
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "space-between",
+              }}
+            >
+              <Typography variant="h6" gutterBottom>
+                Request
+              </Typography>
+
+              <FormDialog
+                ActionButton={<ReportActionButton />}
+                onClick={reportError}
+                title={"Report Bug For " + selectedApi?.name + " Api"}
+                desc={
+                  "Please add a Description For better understanding of this Bug"
                 }
               />
-            }
-            label={`View as ${viewMode === "formatted" ? "Raw" : "Formatted"}`}
-            sx={{ marginBottom: 2 }}
-          />
+            </dev>
 
-          <div className="console-container">
-            <pre
-              className="console-content"
-              style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}
+            <div className="console-container">
+              <pre
+                className="console-content"
+                style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}
+              >
+                {req}
+              </pre>
+            </div>
+          </Paper>
+        )}
+
+        {response && (
+          <Paper
+            elevation={3}
+            sx={{ padding: 2, marginTop: 5, borderRadius: 3 }}
+          >
+            <Typography variant="h6" gutterBottom>
+              Response
+            </Typography>
+            <Button
+              onClick={handleSaveResponse}
+              variant="contained"
+              color="secondary"
+              startIcon={<SaveIcon />}
+              sx={{ marginBottom: 2, marginRight: 5 }}
             >
-              {viewMode === "formatted"
-                ? response
-                : JSON.stringify(JSON.parse(response), null, 2)}
-            </pre>
-          </div>
-        </Paper>
-      )}
+              Save Response
+            </Button>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={viewMode === "formatted"}
+                  onChange={() =>
+                    setViewMode(viewMode === "formatted" ? "raw" : "formatted")
+                  }
+                />
+              }
+              label={`View as ${
+                viewMode === "formatted" ? "Raw" : "Formatted"
+              }`}
+              sx={{ marginBottom: 2 }}
+            />
 
-      {errors && (
-        <Typography color="error" variant="body1">
-          {errors}
-        </Typography>
-      )}
+            <div className="console-container">
+              <pre
+                className="console-content"
+                style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}
+              >
+                {viewMode === "formatted"
+                  ? response
+                  : JSON.stringify(JSON.parse(response), null, 2)}
+              </pre>
+            </div>
+          </Paper>
+        )}
+
+        {errors && (
+          <Typography color="error" variant="body1">
+            {errors}
+          </Typography>
+        )}
+      </div>
     </Box>
   );
 };

@@ -31,7 +31,8 @@ import { DeleteRequestJson, GetRequest } from "../../Network/ApiRequests";
 import { ApiUrls } from "../../Network/ApiUrls";
 import { FormateDate } from "../../utill/Helper";
 import Conformation from "../../common/Conformation";
-const Dashboard = ({ setSelectedPage }) => {
+import { useNavigate } from "react-router-dom";
+const Dashboard = () => {
   const theme = useTheme();
   const { token, mUser } = useContext(UserContext);
 
@@ -47,9 +48,10 @@ const Dashboard = ({ setSelectedPage }) => {
   const [noOfApis, setNoOfApis] = useState([]);
   const [noOfRequest, setNoOfRequest] = useState([]);
 
+  const navigate = useNavigate();
+
   const handleViewApis = (access) => {
-    setSelectedPage("api-management", access);
-    // Navigate to API management page
+    navigate("/project-details",{state:{data:access}});
   };
 
   const handleClose = () => {
