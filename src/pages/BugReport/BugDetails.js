@@ -319,6 +319,7 @@ const BugDetails = () => {
                 fullWidth
                 variant="outlined"
                 size="small"
+                disabled={bug?.status=="Resolved"||bug?.status=="Closed"}
               >
                 {users?.map((item) => {
                   return <MenuItem value={item?.id}>{item?.name}</MenuItem>;

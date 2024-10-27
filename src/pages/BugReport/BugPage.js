@@ -1,20 +1,18 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import BugList from './BugList';
 import TaskToolbar from '../../common/TaskToolbar';
 import { useTheme } from '@emotion/react';
-import { GetRequest } from '../../Network/ApiRequests';
+import { DeleteRequestJson, GetRequest } from '../../Network/ApiRequests';
 import { ApiUrls } from '../../Network/ApiUrls';
 import { UserContext } from '../../context/MyContext';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
-/* const bugsData = [
-  { id: 1, title: 'API Timeout Issue', status: 'Open', reporter: { name: 'Alice' }, timestamp: new Date() },
-  { id: 2, title: 'UI Bug in Dashboard', status: 'Closed', reporter: { name: 'Bob' }, timestamp: new Date() },
-  { id: 3, title: 'UI Bug in Dashboard', status: 'Closed', reporter: { name: 'Bob' }, timestamp: new Date() },
-  { id: 4, title: 'UI Bug in Dashboard', status: 'Closed', reporter: { name: 'Bob' }, timestamp: new Date() },
-]; */
 
 const BugPage = () => {
+
+  const location = useLocation();
+  const { pid } = location.state;
+
   const [selectedBug, setSelectedBug] = useState(null);
   const [bugsData, setBugsData] = useState([]);
   const { token, mUser } = useContext(UserContext);
@@ -23,9 +21,9 @@ const BugPage = () => {
 
 
 
-  const getBugs = () => {
+  const getBugs = useCallback(() => {
     GetRequest(
-      ApiUrls.getBug+"10",
+      ApiUrls.getBug+pid,
       {},
       null,
       token,
@@ -36,7 +34,7 @@ const BugPage = () => {
       },
       null
     );
-  };
+  },[pid]);
 
 
   const handleBugSelect = (bug) => {
@@ -51,12 +49,25 @@ const BugPage = () => {
 useEffect(()=>{
   getBugs();
 },[])
-
+const DeleteBug = (id) => {
+  DeleteRequestJson(
+    ApiUrls.deleteBug + id,
+    {},
+    null,
+    token,
+    null,
+    null,
+    (res) => {
+      getBugs();
+    },
+    null
+  );
+};
 
   return (
     <div style={{backgroundColor: theme.palette.background.default, minHeight: 700,}}>
           <TaskToolbar setState={false} backenabled={true}/>
-      <BugList bugs={bugsData} onBugSelect={handleBugSelect} />
+      <BugList bugs={bugsData} onBugSelect={handleBugSelect} DeleteBug={DeleteBug} />
     </div>
   );
 };

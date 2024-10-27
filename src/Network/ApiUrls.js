@@ -1,5 +1,5 @@
-//export const BaseUrl = "http://localhost:5555/api/"
-export const BaseUrl = "https://easysent.site:5555/api/"
+export const BaseUrl = "http://localhost:5555/api/"
+//export const BaseUrl = "https://easysent.site:5555/api/"
 export const ApiUrls = {
   register: BaseUrl + "auth/signup",
   login: BaseUrl + "auth/login",
@@ -27,5 +27,6 @@ export const ApiUrls = {
   updateBugStatus: BaseUrl + "bug/update-status",
   sendBugMessage: BaseUrl + "bug/messages",
   getBugMessage: BaseUrl + "bug/messages/",
+  deleteBug: BaseUrl + "bug/delete/",
 
 };

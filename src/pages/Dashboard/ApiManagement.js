@@ -392,7 +392,9 @@ const APIManagement = ({ setSelectedPage, data }) => {
         </FormControl>
 
 
-        <BugReportIcon onClick={()=>{navigate("/bugs")}}/>
+        <BugReportIcon onClick={()=>{navigate("/bugs",{
+        state: {pid: data?.project?.id },
+    })}}/>
       </div>
 
       {!!error && (
