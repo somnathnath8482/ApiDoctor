@@ -85,7 +85,7 @@ const TaskToolbar: React.FC<{
             control={
               <MaterialUISwitch
                 sx={{ m: 1 }}
-                defaultChecked={isDarkMode}
+                checked={isDarkMode}
                 onChange={toggleTheme}
               />
             }

@@ -15,10 +15,10 @@ import {
 import { Flex } from "antd";
 import TaskToolbar from "../common/TaskToolbar";
 import { useTheme } from "@emotion/react";
-
+import { useTheme as useCustomTheme } from "../context/ThemeContext";
 const ProfilePage = () => {
     const theme = useTheme();
-
+    const { isDarkMode, toggleTheme } = useCustomTheme(); 
   return (
     <div
     style={{backgroundColor: theme.palette.background.default }}
@@ -74,7 +74,7 @@ const ProfilePage = () => {
               <option value="Spanish">Spanish</option>
               {/* Add more options */}
             </TextField>
-            <Switch /> Dark Theme
+            <Switch checked={isDarkMode} onChange={toggleTheme}/> Dark Theme
           </CardContent>
         </Card>
       </Grid2>
