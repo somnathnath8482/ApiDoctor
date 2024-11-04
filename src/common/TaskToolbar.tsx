@@ -18,6 +18,7 @@ import { MaterialUISwitch } from "./MaterialUISwitch";
 import { storeData, storeJsonData } from "../utill/Storage";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../context/MyContext";
+import { ProfilePath } from "../Network/ApiUrls";
 
 // Styled components for toolbar
 const StyledToolbar = styled(Toolbar)({
@@ -95,8 +96,8 @@ const TaskToolbar: React.FC<{
           {/* Profile Picture */}
           <IconButton onClick={handleMenuClick} style={{ marginLeft: 15 }}>
             <Avatar
-              alt="Profile Picture"
-              src="https://i.pravatar.cc/300" /* Replace with dynamic URL if needed */
+              alt={mUser?.name}
+              src={mUser?.profilePic?ProfilePath+mUser.profilePic:"https://i.pravatar.cc/300"} 
               style={{ cursor: "pointer", width: 40, height: 40 }}
             />
           </IconButton>

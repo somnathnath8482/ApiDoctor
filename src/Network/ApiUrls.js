@@ -1,5 +1,12 @@
-export const BaseUrl = "http://localhost:5555/api/"
-//export const BaseUrl = "https://easysent.site:5555/api/"
+
+
+
+    export const Server = "http://localhost"
+   //export const Server = "https://easysent.site";
+
+export const BaseUrl = Server+":5555/api/";
+export const ProfilePath = Server+"/apiflow/backend/ApiFlow-Hosting/uploads/"
+
 export const ApiUrls = {
   register: BaseUrl + "auth/signup",
   login: BaseUrl + "auth/login",
@@ -28,5 +35,8 @@ export const ApiUrls = {
   sendBugMessage: BaseUrl + "bug/messages",
   getBugMessage: BaseUrl + "bug/messages/",
   deleteBug: BaseUrl + "bug/delete/",
+  updateProfile: BaseUrl + "users/updateProfile",
+  getActivityHistory: BaseUrl + "users/activity-history",
+  getLoginHistory: BaseUrl + "users/login-history",
 
 };
