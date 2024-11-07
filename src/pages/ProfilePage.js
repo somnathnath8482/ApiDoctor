@@ -20,11 +20,12 @@ import TaskToolbar from "../common/TaskToolbar";
 import { useTheme } from "@emotion/react";
 import { useTheme as useCustomTheme } from "../context/ThemeContext";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
-import {  GetRequest, PostRequestFormData } from "../Network/ApiRequests";
+import { GetRequest, PostRequestFormData, PostRequestJson } from "../Network/ApiRequests";
 import { ApiUrls, ProfilePath } from "../Network/ApiUrls";
 import { UserContext } from "../context/MyContext";
 import { storeJsonData } from "../utill/Storage";
 import { FormateDate } from "../utill/Helper";
+import "../css/ConsoleBlock.css";
 const ProfilePage = () => {
   const theme = useTheme();
   const { isDarkMode, toggleTheme } = useCustomTheme();
@@ -37,9 +38,14 @@ const ProfilePage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState("");
   const [role, setRole] = useState("");
-  const { token, mUser,setmUser } = useContext(UserContext);
+  const { token, mUser, setmUser } = useContext(UserContext);
   const [selectedFile, setSelectedFile] = useState(null);
   const [loginHistory, setLoginHistory] = useState([]);
+  const [activityHistory, setActivityHistory] = useState([]);
+
+  const [pass, setPass] = useState("");
+  const [twoFa, setTwoFa] = useState(false);
+  const [mailNoti, setMailNoti] = useState(true);
 
   const handleImageChange = (event) => {
     const file = event.target.files[0];
@@ -53,18 +59,24 @@ const ProfilePage = () => {
     }
   };
 
-  const updateData = useCallback(()=>{
-
+  const updateData = useCallback(() => {
     setName(mUser?.name);
     setRole(mUser?.role);
-    setAvatarSrc(mUser?.profilePic?ProfilePath+mUser.profilePic:"https://i.pravatar.cc/300")
+    setAvatarSrc(
+      mUser?.profilePic
+        ? ProfilePath + mUser.profilePic
+        : "https://i.pravatar.cc/300"
+    );
 
-  },[mUser]);
+  setTwoFa(mUser?.twoFactorAuth=="Y"?true:false);
+  setMailNoti(mUser?.mailNotification=="N"?false:true);
 
-  useEffect(()=>{
+  }, [mUser]);
+
+  useEffect(() => {
     updateData();
     getLoginHistory();
-  },[])
+  }, []);
 
   const editProfile = () => {
     const formData = new FormData();
@@ -83,33 +95,68 @@ const ProfilePage = () => {
       null,
       null,
       (res) => {
-
-        if(res){
-          storeJsonData("user",res.data);
+        if (res) {
+          storeJsonData("user", res.data);
           setmUser(res?.data);
           setIsEditing(false);
         }
-
       },
       null
     );
-  }; 
-  
-  const getLoginHistory = () => {
-    
+  };
 
+  const getLoginHistory = () => {
     GetRequest(
-      ApiUrls.getLoginHistory,{},
+      ApiUrls.getLoginHistory,
+      {},
       null,
       token,
       null,
       null,
       (res) => {
-
-        if(res){
+        if (res) {
           setLoginHistory(res?.data);
         }
+      },
+      null
+    );
 
+    GetRequest(
+      ApiUrls.getActivityHistory,
+      {},
+      null,
+      token,
+      null,
+      null,
+      (res) => {
+        if (res) {
+          setActivityHistory(res?.data);
+        }
+      },
+      null
+    );
+  }; 
+  
+  const updateSecurity = () => {
+   
+    let dta = {
+      "noti":mailNoti?"Y":"N",
+      "pass":pass,
+      "twoFa":twoFa?"Y":"N",
+    }
+
+    PostRequestJson(
+      ApiUrls.updateSecurity,
+      dta,
+      null,
+      token,
+      null,
+      null,
+      (res) => {
+        if (res) {
+          storeJsonData("user", res.data);
+          setmUser(res?.data);
+        }
       },
       null
     );
@@ -135,7 +182,11 @@ const ProfilePage = () => {
                 onMouseEnter={() => setHover(true)}
                 onMouseLeave={() => setHover(false)}
               >
-                <Avatar alt={mUser?.name} src={avatarSrc} style={{ width: 80, height: 80 }} />
+                <Avatar
+                  alt={mUser?.name}
+                  src={avatarSrc}
+                  style={{ width: 80, height: 80 }}
+                />
 
                 {hover && (
                   <IconButton
@@ -251,59 +302,111 @@ const ProfilePage = () => {
             </CardContent>
           </Card>
         </Grid2>
+        {/* Login Log */}
+        <Grid2 item xs={12} size={6}>
+          <Card sx={{ height: "100%", width: "100%" }}>
+            <CardContent>
+              <Typography variant="h6">Login History</Typography>
+              <div className="console-container" style={{ borderRadius: 10 }}>
+                <pre
+                  className="console-content"
+                  style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}
+                >
+                  <List>
+                    {loginHistory.map((item) => {
+                      return (
+                        <div>
+                          <ListItem>
+                            Login {item?.status?.toLowerCase()} From Location-{" "}
+                            {item?.city}, From {item?.userAgent} Device, IP -{" "}
+                            {item?.ipAddress} At -{" "}
+                            {FormateDate(item?.loginTimestamp)}
+                          </ListItem>
+                          <Divider />
+                        </div>
+                      );
+                    })}
+
+                    {/* More activity logs */}
+                  </List>
+                  <Button variant="contained" style={{ marginTop: 10 }}>
+                    Download Log
+                  </Button>
+                </pre>
+              </div>
+            </CardContent>
+          </Card>
+        </Grid2>
+
         {/* Activity Log */}
-        <Grid2 item xs={12} size={12}>
+        <Grid2 item xs={12} size={6}>
           <Card sx={{ height: "100%", width: "100%" }}>
             <CardContent>
               <Typography variant="h6">Activity Log</Typography>
-              <List>
-                {loginHistory.map((item=>{
-                  return (<div>
-                  <ListItem>Login {item?.status?.toLowerCase()} From Location- {item?.city}, From {item?.userAgent} Device, IP - {item?.ipAddress
-                  } At - {FormateDate(item?.loginTimestamp)}</ListItem>
-                  <Divider />
-                  </div>)
-                }))}
-                
-               
-               
-                {/* More activity logs */}
-              </List>
-              <Button variant="outlined" style={{ marginTop: 10 }}>
-                Download Log
-              </Button>
+              <div className="console-container" style={{ borderRadius: 10 }}>
+                <pre
+                  className="console-content"
+                  style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}
+                >
+                  <List>
+                    {activityHistory.map((item) => {
+                      return (
+                        <div>
+                          <ListItem>
+                            {item?.action} Details: {item?.details} At:{" "}
+                            {FormateDate(item?.timestamp)}
+                          </ListItem>
+                          <Divider />
+                        </div>
+                      );
+                    })}
+
+                    {/* More activity logs */}
+                  </List>
+                  <Button variant="contained" style={{ marginTop: 10 }}>
+                    Download Log
+                  </Button>
+                </pre>
+              </div>
             </CardContent>
           </Card>
         </Grid2>
 
         {/* Account Security */}
-        <Grid2 item xs={12} size={6}>
+        <Grid2 item xs={12} size={12}>
           <Card>
             <CardContent>
               <Typography variant="h6">Account Security</Typography>
-              <Button variant="outlined" style={{ marginBottom: 10 }}>
-                Change Password
-              </Button>
-              <Typography variant="subtitle2">
-                Two-Factor Authentication
-              </Typography>
-              <Switch />
-              
-            </CardContent>
-          </Card>
-        </Grid2>
-
-        {/* Notification Settings */}
-        <Grid2 item xs={12} size={6}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">Notification Settings</Typography>
               <List>
+                <ListItem>Change Password</ListItem>
                 <ListItem>
-                  Email Notifications <Switch />
+                  <TextField
+                    label="New Password"
+                    name="password"
+                    type="password"
+                    value={pass}
+                    placeholder="New password"
+                    size="small"
+                    onChange={(e) => {
+                      setPass(e.target.value);
+                    }}
+                    variant="outlined"
+                    fullWidth
+                    style={{ width: "25%" }}
+                  />
                 </ListItem>
+
                 <ListItem>
-                  In-app Notifications <Switch />
+                 <text style={{width:250}}>Two-Factor Authentication</text> <Switch checked={twoFa} onChange={(e)=>{setTwoFa(!twoFa)}}/>
+                </ListItem>
+
+                <ListItem>
+                <text style={{width:250}}>Email Notifications</text> <Switch checked={mailNoti} onChange={(e)=>{setMailNoti(!mailNoti)}}/>
+                </ListItem>
+                  <ListItem>
+                  <Button variant="outlined" style={{ marginBottom: 10 }} onClick={updateSecurity}>
+                   Update Security
+                  </Button>
                 </ListItem>
               </List>
             </CardContent>

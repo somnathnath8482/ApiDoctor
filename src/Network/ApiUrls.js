@@ -1,8 +1,8 @@
 
 
 
-    export const Server = "http://localhost"
-   //export const Server = "https://easysent.site";
+    //export const Server = "http://localhost"
+   export const Server = "https://easysent.site";
 
 export const BaseUrl = Server+":5555/api/";
 export const ProfilePath = Server+"/apiflow/backend/ApiFlow-Hosting/uploads/"
@@ -38,5 +38,6 @@ export const ApiUrls = {
   updateProfile: BaseUrl + "users/updateProfile",
   getActivityHistory: BaseUrl + "users/activity-history",
   getLoginHistory: BaseUrl + "users/login-history",
+  updateSecurity: BaseUrl + "users/updateSecurity",
 
 };
