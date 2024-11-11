@@ -1,8 +1,9 @@
 # HealthVibe API Management Suite (Frontend)
 
-[![License](https://img.shields.io/github/license/username/repository.svg)](LICENSE)
-[![Issues](https://img.shields.io/github/issues/username/repository.svg)](https://github.com/username/repository/issues)
-[![Contributors](https://img.shields.io/github/contributors/username/repository.svg)](https://github.com/username/repository/graphs/contributors)
+[![License](https://img.shields.io/github/license/somnathnath8482/ApiDoctor.svg)](LICENSE)
+[![Issues](https://img.shields.io/github/issues/somnathnath8482/ApiDoctor.svg)](https://github.com/somnathnath8482/ApiDoctor/issues)
+[![Contributors](https://img.shields.io/github/contributors/somnathnath8482/ApiDoctor.svg)](https://github.com/somnathnath8482/ApiDoctor/graphs/contributors)
+
 
 Welcome to **HealthVibe**, an open-source frontend for an API management and testing suite. This platform is designed for seamless project and workflow management, optimized for developers, testers, and managers who work with APIs. You can try it live at [https://healthvibe.in/](https://healthvibe.in/).
 
