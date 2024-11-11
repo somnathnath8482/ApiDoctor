@@ -64,7 +64,7 @@ To get a local copy of the **HealthVibe frontend** up and running, follow these 
 
 1. **Clone the Repository**
    ```
-   git clone https://github.com/username/repository.git
+   git clone https://github.com/somnathnath8482/ApiDoctor.git
    cd repository
    ````
 
