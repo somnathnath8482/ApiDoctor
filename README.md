@@ -111,7 +111,7 @@ Please refer to our CONTRIBUTING.md for more detailed guidelines.
 If you encounter any bugs, please:
 
 Open an issue in the repository with details.
-Alternatively, you can report bugs via email: yourname@example.com.
+Alternatively, you can report bugs via email: admin@healthvibe.in.
 Roadmap
 Here’s a brief outline of upcoming frontend features:
 
