@@ -1,6 +1,6 @@
 # HealthVibe API Management Suite (Frontend)
 
-[![License](https://img.shields.io/github/license/somnathnath8482/ApiDoctor.svg)](LICENSE)
+[![License](https://img.shields.io/github/license/somnathnath8482/ApiDoctor.svg)](https://github.com/somnathnath8482/ApiDoctor/blob/main/LICENSE)
 [![Issues](https://img.shields.io/github/issues/somnathnath8482/ApiDoctor.svg)](https://github.com/somnathnath8482/ApiDoctor/issues)
 [![Contributors](https://img.shields.io/github/contributors/somnathnath8482/ApiDoctor.svg)](https://github.com/somnathnath8482/ApiDoctor/graphs/contributors)
 
